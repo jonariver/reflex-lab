@@ -918,6 +918,10 @@ function renderResult(){
   const streak = markPlayedToday();
   const achievements = unlockedAchievements(scores, overall, difficulty);
 
+  const achievementsLine = achievements.length
+    ? `\n🏅 ${achievements.map(a => `${a.icon} ${a.label}`).join(', ')}`
+    : '';
+
   const shareText =
 `🧪 REFLEX LAB — TAGES-CHALLENGE ${todayLabel}
 Schwierigkeit: ${diffLabel}
@@ -925,7 +929,7 @@ Gesamt: ${overall}/100 — ${diag.title}
 ⚡ Reaktion: ${r.ms}ms
 🎯 Timing: ${t.accuracy}%
 🧠 Gedächtnis: ${m.correct}/${m.total}
-📍 Präzision: ${p.score}%
+📍 Präzision: ${p.score}%${achievementsLine}
 Schlag das → `;
 
   const shareUrl = buildShareUrl({
@@ -966,16 +970,16 @@ Schlag das → `;
     renderIntro();
   };
   document.getElementById('cardBtn').onclick = ()=>{
-    shareCard({ overall, diag, r, t, m, p, shareText, diffLabel });
+    shareCard({ overall, diag, r, t, m, p, shareText: shareText + shareUrl, diffLabel, achievements });
   };
   document.getElementById('linkBtn').onclick = async ()=>{
+    const fullShareText = shareText + shareUrl;
     if(navigator.share){
       try{
-        await navigator.share({ title: 'Reflex Lab — Tages-Challenge', text: shareText, url: shareUrl });
+        await navigator.share({ title: 'Reflex Lab — Tages-Challenge', text: fullShareText });
         return;
       }catch(err){ /* Nutzer hat abgebrochen oder Teilen fehlgeschlagen — Fallback unten */ }
     }
-    const fullShareText = shareText + shareUrl;
     const ok = await copyToClipboard(fullShareText);
     if(ok){
       showToast('Ergebnis kopiert ✓');
@@ -987,8 +991,9 @@ Schlag das → `;
 
 /* ---------------- SHARE CARD (Canvas) ---------------- */
 function buildCardCanvas(data){
-  const { overall, diag, r, t, m, p, diffLabel } = data;
-  const W = 640, H = 900;
+  const { overall, diag, r, t, m, p, diffLabel, achievements = [] } = data;
+  const W = 640;
+  const H = 900 + (achievements.length ? 110 : 0);
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -1046,12 +1051,18 @@ function buildCardCanvas(data){
     y += 42;
   });
 
-  dashedLine(ctx, 40, y + 10, W - 40, y + 10);
+  let contentY = y + 10;
+  dashedLine(ctx, 40, contentY, W - 40, contentY);
+
+  if(achievements.length){
+    contentY = drawBadges(ctx, achievements, contentY + 32, W);
+    dashedLine(ctx, 40, contentY, W - 40, contentY);
+  }
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#4A5A55';
   ctx.font = '400 13px "Space Mono", monospace';
-  ctx.fillText('ENDE DER PRÜFUNG', centerX, y + 45);
+  ctx.fillText('ENDE DER PRÜFUNG', centerX, contentY + 35);
 
   ctx.fillStyle = '#16221F';
   ctx.font = '700 16px Inter, sans-serif';
@@ -1072,6 +1083,64 @@ function buildCardCanvas(data){
   ctx.fill();
 
   return canvas;
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function drawBadges(ctx, badges, startY, W){
+  const padX = 40;
+  const maxWidth = W - padX * 2;
+  const gap = 10;
+  const pillHeight = 34;
+  const lineGap = 10;
+
+  ctx.font = '700 15px "Space Mono", monospace';
+  const items = badges.map(b => {
+    const text = `${b.icon} ${b.label}`;
+    return { text, w: ctx.measureText(text).width + 24 };
+  });
+
+  const rows = [];
+  let currentRow = [];
+  let currentWidth = 0;
+  items.forEach(item => {
+    if(currentRow.length && currentWidth + gap + item.w > maxWidth){
+      rows.push(currentRow);
+      currentRow = [];
+      currentWidth = 0;
+    }
+    currentRow.push(item);
+    currentWidth += (currentRow.length > 1 ? gap : 0) + item.w;
+  });
+  if(currentRow.length) rows.push(currentRow);
+
+  let y = startY;
+  rows.forEach(row => {
+    const rowWidth = row.reduce((sum, item) => sum + item.w, 0) + gap * (row.length - 1);
+    let x = (W - rowWidth) / 2;
+    row.forEach(item => {
+      ctx.fillStyle = '#F2B705';
+      roundRect(ctx, x, y, item.w, pillHeight, pillHeight / 2);
+      ctx.fill();
+      ctx.fillStyle = '#16221F';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(item.text, x + 12, y + pillHeight / 2 + 1);
+      x += item.w + gap;
+    });
+    y += pillHeight + lineGap;
+  });
+
+  ctx.textBaseline = 'alphabetic';
+  return y;
 }
 
 function dashedLine(ctx, x1, y, x2, y2){
