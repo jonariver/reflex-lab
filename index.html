@@ -802,7 +802,7 @@ const DIAGNOSES = {
 };
 
 function diagnosisFor(score){
-  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const pick = (arr) => arr[Math.floor(rng() * arr.length)];
   if(score >= 90) return pick(DIAGNOSES.s90);
   if(score >= 75) return pick(DIAGNOSES.s75);
   if(score >= 55) return pick(DIAGNOSES.s55);
@@ -872,11 +872,12 @@ Schlag das → `;
         return;
       }catch(err){ /* Nutzer hat abgebrochen oder Teilen fehlgeschlagen — Fallback unten */ }
     }
-    const ok = await copyToClipboard(shareUrl);
+    const fullShareText = shareText + shareUrl;
+    const ok = await copyToClipboard(fullShareText);
     if(ok){
-      showToast('Link kopiert ✓');
+      showToast('Ergebnis kopiert ✓');
     } else {
-      showLinkFallback(shareUrl);
+      showLinkFallback(fullShareText);
     }
   };
 }
