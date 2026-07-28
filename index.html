@@ -89,6 +89,15 @@
     flex-direction: column;
   }
 
+  @media (max-width: 480px){
+    #stage{ padding: 12px; }
+    #device{ max-width: 100%; }
+    #screen{
+      min-height: calc(100vh - 110px);
+      min-height: calc(100dvh - 110px);
+    }
+  }
+
   .screen-inner{
     flex:1;
     display:flex;
