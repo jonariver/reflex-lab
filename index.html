@@ -178,6 +178,29 @@
     font-weight: 700;
   }
 
+  /* ---------- Difficulty picker ---------- */
+  .diff-picker{
+    display:flex;
+    gap: 8px;
+    margin: 0 0 22px;
+  }
+  .diff-chip{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: transparent;
+    color: var(--ink-soft);
+    box-shadow: 0 0 0 1.5px var(--paper-dim) inset;
+    transition: none;
+  }
+  .diff-chip.active{
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: none;
+  }
+
   /* ---------- Progress dots ---------- */
   #progress{
     position:absolute;
@@ -520,6 +543,47 @@ try{
   incomingChallenge = null;
 }
 
+/* ---------------- DIFFICULTY ---------------- */
+const DIFFICULTY_KEY = 'reflexlab_difficulty';
+const DIFFICULTIES = {
+  leicht: {
+    label: 'LEICHT',
+    reactionScoreRange: [180, 650],
+    timingSpeed: 3.0,
+    timingZonePct: 26,
+    memoryLength: 3,
+    memoryFlashMs: 550, memoryGapMs: 300,
+    precisionSize: { mobile: 320, desktop: 90 },
+    precisionTimeoutMs: 1500,
+  },
+  normal: {
+    label: 'NORMAL',
+    reactionScoreRange: [180, 550],
+    timingSpeed: 4.2,
+    timingZonePct: 18,
+    memoryLength: 4,
+    memoryFlashMs: 500, memoryGapMs: 250,
+    precisionSize: { mobile: 280, desktop: 70 },
+    precisionTimeoutMs: 1150,
+  },
+  schwer: {
+    label: 'SCHWER',
+    reactionScoreRange: [150, 450],
+    timingSpeed: 6.0,
+    timingZonePct: 12,
+    memoryLength: 6,
+    memoryFlashMs: 350, memoryGapMs: 150,
+    precisionSize: { mobile: 200, desktop: 56 },
+    precisionTimeoutMs: 800,
+  },
+};
+let difficulty = DIFFICULTIES[localStorage.getItem(DIFFICULTY_KEY)] ? localStorage.getItem(DIFFICULTY_KEY) : 'normal';
+function setDifficulty(d){
+  difficulty = DIFFICULTIES[d] ? d : 'normal';
+  localStorage.setItem(DIFFICULTY_KEY, difficulty);
+}
+function diffCfg(){ return DIFFICULTIES[difficulty]; }
+
 /* ---------------- INTRO ---------------- */
 function renderIntro(){
   currentTestIndex = -1;
@@ -527,10 +591,11 @@ function renderIntro(){
 
   if(incomingChallenge && !challengeDismissed){
     const c = incomingChallenge;
+    const challengeDiff = DIFFICULTIES[c.diff] ? c.diff : 'normal';
     app.innerHTML = `
       <div class="eyebrow">Tages-Challenge · ${c.date || todayLabel}</div>
       <h1 class="display" style="font-size:24px;">HERAUSGEFORDERT</h1>
-      <p class="sub">Jemand hat heute <strong>${c.overall}/100</strong> erreicht — Diagnose: „${c.diag}“. Schaffst du mehr?</p>
+      <p class="sub">Jemand hat heute auf <strong>${DIFFICULTIES[challengeDiff].label}</strong> <strong>${c.overall}/100</strong> erreicht — Diagnose: „${c.diag}“. Schaffst du mehr?</p>
       <div class="challenge-stats">
         <div class="row"><span>REAKTION</span><span>${c.r}ms</span></div>
         <div class="row"><span>TIMING</span><span>${c.t}%</span></div>
@@ -540,7 +605,7 @@ function renderIntro(){
       <button class="signal" id="startBtn">Challenge annehmen</button>
       <button class="ghost" id="skipBtn" style="margin-top:10px;">Eigene Runde starten</button>
     `;
-    document.getElementById('startBtn').onclick = ()=>{ challengeDismissed = true; resetDailyRng(); nextTest(); };
+    document.getElementById('startBtn').onclick = ()=>{ challengeDismissed = true; setDifficulty(challengeDiff); resetDailyRng(); nextTest(); };
     document.getElementById('skipBtn').onclick = ()=>{ challengeDismissed = true; renderIntro(); };
     return;
   }
@@ -549,8 +614,14 @@ function renderIntro(){
     <div class="eyebrow">Tages-Challenge · ${todayLabel}</div>
     <h1 class="display">REFLEX LAB</h1>
     <p class="sub">Wir testen Reaktion, Timing, Gedächtnis und Präzision. Heute haben alle die gleiche Challenge — am Ende bekommst du deinen Laborbericht.</p>
+    <div class="diff-picker">
+      ${Object.keys(DIFFICULTIES).map(key => `<button class="diff-chip${key === difficulty ? ' active' : ''}" data-diff="${key}">${DIFFICULTIES[key].label}</button>`).join('')}
+    </div>
     <button class="signal" id="startBtn">Test starten</button>
   `;
+  document.querySelectorAll('.diff-chip').forEach(chip=>{
+    chip.onclick = ()=>{ setDifficulty(chip.dataset.diff); renderIntro(); };
+  });
   document.getElementById('startBtn').onclick = ()=>{ resetDailyRng(); nextTest(); };
 }
 
@@ -613,7 +684,8 @@ function renderReaction(){
     }
     if(state === 'go'){
       const ms = Math.round(performance.now() - goTime);
-      scores.reaction = { ms, score: Math.round(mapRange(ms, 180, 550, 100, 20)) };
+      const [rMin, rMax] = diffCfg().reactionScoreRange;
+      scores.reaction = { ms, score: Math.round(mapRange(ms, rMin, rMax, 100, 20)) };
       zone.removeEventListener('click', handler);
       nextTest();
     }
@@ -628,17 +700,21 @@ function renderTiming(){
     <h1 class="display" style="font-size:22px;">TIMING</h1>
     <p class="sub">${isMobile ? 'Tippe irgendwo auf den Screen, wenn die Nadel in der Zielzone ist.' : 'Stoppe die Nadel in der Zielzone.'}</p>
     <div class="timing-track">
-      <div class="timing-target"></div>
+      <div class="timing-target" id="timingTarget"></div>
       <div class="timing-needle" id="needle"></div>
     </div>
     ${isMobile ? '' : '<button class="ghost" id="stopBtn">STOPPEN</button>'}
   `;
   const track = document.querySelector('.timing-track');
   const needle = document.getElementById('needle');
+  const zonePct = diffCfg().timingZonePct;
+  const targetEl = document.getElementById('timingTarget');
+  targetEl.style.width = zonePct + '%';
+  targetEl.style.left = ((100 - zonePct) / 2) + '%';
   const trackWidth = track.offsetWidth;
   let pos = 0;
   let dir = 1;
-  const speed = 4.2;
+  const speed = diffCfg().timingSpeed;
   let running = true;
 
   function tick(){
@@ -686,8 +762,11 @@ function renderMemory(){
     grid.appendChild(t);
     tiles.push(t);
   }
+  const memoryLength = diffCfg().memoryLength;
+  const flashMs = diffCfg().memoryFlashMs;
+  const gapMs = diffCfg().memoryGapMs;
   const sequence = [];
-  while(sequence.length < 4){
+  while(sequence.length < memoryLength){
     const idx = Math.floor(rng()*9);
     if(!sequence.includes(idx)) sequence.push(idx);
   }
@@ -704,8 +783,8 @@ function renderMemory(){
     setTimeout(()=>{
       tile.classList.remove('flash');
       i++;
-      setTimeout(flashNext, 250);
-    }, 500);
+      setTimeout(flashNext, gapMs);
+    }, flashMs);
   }
   setTimeout(flashNext, 600);
 
@@ -739,7 +818,9 @@ function renderPrecision(){
   const fieldRect = () => field.getBoundingClientRect();
   let round = 0;
   const results = [];
-  const SIZE_START = window.matchMedia('(max-width: 480px)').matches ? 280 : 70;
+  const isMobilePrecision = window.matchMedia('(max-width: 480px)').matches;
+  const SIZE_START = isMobilePrecision ? diffCfg().precisionSize.mobile : diffCfg().precisionSize.desktop;
+  const TARGET_TIMEOUT_MS = diffCfg().precisionTimeoutMs;
 
   function spawnTarget(){
     const size = SIZE_START;
@@ -773,7 +854,7 @@ function renderPrecision(){
       results.push(0);
       target.remove();
       advance();
-    }, 1150);
+    }, TARGET_TIMEOUT_MS);
 
     target.onclick = (e)=>{
       if(clicked) return;
@@ -860,9 +941,11 @@ function renderResult(){
     r.score * 0.3 + t.score * 0.2 + m.score * 0.25 + p.score * 0.25
   );
   const diag = diagnosisFor(overall);
+  const diffLabel = DIFFICULTIES[difficulty].label;
 
   const shareText =
 `🧪 REFLEX LAB — TAGES-CHALLENGE ${todayLabel}
+Schwierigkeit: ${diffLabel}
 Gesamt: ${overall}/100 — ${diag.title}
 ⚡ Reaktion: ${r.ms}ms
 🎯 Timing: ${t.accuracy}%
@@ -871,13 +954,13 @@ Gesamt: ${overall}/100 — ${diag.title}
 Schlag das → `;
 
   const shareUrl = buildShareUrl({
-    overall, diag: diag.title, date: todayLabel,
+    overall, diag: diag.title, date: todayLabel, diff: difficulty,
     r: r.ms, t: t.accuracy, m: `${m.correct}/${m.total}`, p: p.score,
   });
 
   app.innerHTML = `
     <div class="receipt">
-      <div class="receipt-sub">REFLEX LAB · LABORBERICHT</div>
+      <div class="receipt-sub">REFLEX LAB · LABORBERICHT · ${diffLabel}</div>
       <div class="receipt-title">${new Date().toLocaleDateString('de-DE')}</div>
       <hr>
       <div class="receipt-diagnosis">${diag.title}</div>
@@ -906,7 +989,7 @@ Schlag das → `;
     renderIntro();
   };
   document.getElementById('cardBtn').onclick = ()=>{
-    shareCard({ overall, diag, r, t, m, p, shareText });
+    shareCard({ overall, diag, r, t, m, p, shareText, diffLabel });
   };
   document.getElementById('linkBtn').onclick = async ()=>{
     if(navigator.share){
@@ -927,7 +1010,7 @@ Schlag das → `;
 
 /* ---------------- SHARE CARD (Canvas) ---------------- */
 function buildCardCanvas(data){
-  const { overall, diag, r, t, m, p } = data;
+  const { overall, diag, r, t, m, p, diffLabel } = data;
   const W = 640, H = 900;
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
@@ -946,7 +1029,7 @@ function buildCardCanvas(data){
 
   ctx.fillStyle = '#4A5A55';
   ctx.font = '700 15px "Space Mono", monospace';
-  ctx.fillText('REFLEX LAB · TAGES-CHALLENGE', centerX, 40);
+  ctx.fillText(`REFLEX LAB · TAGES-CHALLENGE · ${diffLabel}`, centerX, 40);
 
   ctx.fillStyle = '#16221F';
   ctx.font = '700 17px "Space Mono", monospace';
