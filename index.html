@@ -523,7 +523,8 @@ function renderIntro(){
         <div class="row"><span>GEDÄCHTNIS</span><span>${c.m}</span></div>
         <div class="row"><span>PRÄZISION</span><span>${c.p}%</span></div>
       </div>
-      <button class="signal" id="startBtn">Challenge annehmen</button>
+      ${achievementsByIds(c.ach).length ? `<div class="achievements">${achievementsByIds(c.ach).map(a => `<span class="achievement-badge" title="${a.desc}">${a.icon} ${a.label}</span>`).join('')}</div>` : ''}
+      <button class="signal" id="startBtn" style="margin-top:18px;">Challenge annehmen</button>
       <button class="ghost" id="skipBtn" style="margin-top:10px;">Eigene Runde starten</button>
     `;
     document.getElementById('startBtn').onclick = ()=>{ challengeDismissed = true; setDifficulty(challengeDiff); resetDailyRng(); nextTest(); };
@@ -866,42 +867,53 @@ function diagnosisFor(score){
 /* ---------------- ACHIEVEMENTS ---------------- */
 const ACHIEVEMENTS = [
   {
+    id: 'blitz',
     icon: '⚡',
     label: 'Blitzreflex',
     desc: 'Unter 200ms reagiert',
     check: (s) => s.reaction.ms < 200,
   },
   {
+    id: 'volltreffer',
     icon: '🎯',
     label: 'Volltreffer',
     desc: 'Timing fast exakt in der Mitte gestoppt',
     check: (s) => s.timing.accuracy >= 99,
   },
   {
+    id: 'gedaechtnis',
     icon: '🧠',
     label: 'Fotografisches Gedächtnis',
     desc: 'Gedächtnis-Sequenz fehlerfrei',
     check: (s) => s.memory.correct === s.memory.total,
   },
   {
+    id: 'praezision',
     icon: '📍',
     label: 'Perfekte Präzision',
     desc: 'Alle Ziele fast im Zentrum getroffen',
     check: (s) => s.precision.score >= 95,
   },
   {
+    id: 'elite',
     icon: '🏆',
     label: 'Elite-Reflexe',
     desc: 'Gesamtscore von 90+ erreicht',
     check: (s, overall) => overall >= 90,
   },
   {
+    id: 'hardcore',
     icon: '💀',
     label: 'Hardcore',
     desc: 'Auf Schwer gespielt',
     check: (s, overall, diff) => diff === 'schwer',
   },
 ];
+
+function achievementsByIds(ids){
+  if(!Array.isArray(ids)) return [];
+  return ACHIEVEMENTS.filter(a => ids.includes(a.id));
+}
 
 function unlockedAchievements(s, overall, diff){
   return ACHIEVEMENTS.filter(a => a.check(s, overall, diff));
@@ -935,6 +947,7 @@ Schlag das → `;
   const shareUrl = buildShareUrl({
     overall, diag: diag.title, date: todayLabel, diff: difficulty,
     r: r.ms, t: t.accuracy, m: `${m.correct}/${m.total}`, p: p.score,
+    ach: achievements.map(a => a.id),
   });
 
   app.innerHTML = `
