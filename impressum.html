@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>REFLEX LAB — Impressum</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .impressum-inner{
+    flex:1;
+    display:flex;
+    flex-direction: column;
+    padding: 32px 24px;
+    text-align:left;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  .back-link{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    align-self: flex-start;
+  }
+  .back-links{
+    display:flex;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .impressum-title{
+    font-family: var(--font-display);
+    font-size: 24px;
+    margin: 0 0 20px;
+  }
+  .impressum-body{
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding-right: 4px;
+  }
+  .impressum-heading{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--signal);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .impressum-text{
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  canvas.impressum-canvas{
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  .impressum-footnote{
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="device">
+    <div id="device-header">
+      <div id="device-label">REFLEX LAB · MODELL RX-4</div>
+      <div id="device-dot"></div>
+    </div>
+    <div id="screen">
+      <div class="impressum-inner" id="app"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const app = document.getElementById('app');
+app.innerHTML = `
+  <div class="back-links">
+    <a class="back-link" href="index.html">← Zurück</a>
+    <a class="back-link" href="changelog.html">Changelog</a>
+    <a class="back-link" href="datenschutz.html">Datenschutz</a>
+  </div>
+  <h1 class="impressum-title">IMPRESSUM</h1>
+  <div class="impressum-body">
+    <div>
+      <div class="impressum-heading">Angaben gemäß § 5 TMG</div>
+      <canvas class="impressum-canvas" id="ownerCanvas"></canvas>
+    </div>
+    <div>
+      <div class="impressum-heading">Kontakt</div>
+      <canvas class="impressum-canvas" id="contactCanvas"></canvas>
+    </div>
+    <div>
+      <div class="impressum-heading">Haftung für Inhalte</div>
+      <p class="impressum-text">Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Wir sind jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt.</p>
+    </div>
+    <div>
+      <div class="impressum-heading">Haftung für Links</div>
+      <p class="impressum-text">Diese Seite enthält keine externen Links zu fremden Inhalten, für die eine Haftung übernommen werden müsste. Sollte sich das ändern, wird eine permanente inhaltliche Kontrolle der verlinkten Seiten ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht vorgenommen; bei Bekanntwerden von Rechtsverletzungen werden entsprechende Links umgehend entfernt.</p>
+    </div>
+    <div>
+      <div class="impressum-heading">Urheberrecht</div>
+      <p class="impressum-text">Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Beiträge Dritter sind als solche gekennzeichnet. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
+    </div>
+    <p class="impressum-footnote">Reflex Lab ist ein privates Hobby-Projekt ohne Gewinnerzielungsabsicht.</p>
+  </div>
+`;
+
+function decodeLine(b64){
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function renderTextCanvas(canvasId, encodedLines){
+  const lines = encodedLines.map(decodeLine);
+  const canvas = document.getElementById(canvasId);
+  const scale = window.devicePixelRatio || 1;
+  const lineHeight = 22;
+  const fontSize = 14;
+  const width = 320;
+  const height = lines.length * lineHeight + 16;
+
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  ctx.textBaseline = 'top';
+  ctx.font = `400 ${fontSize}px "Space Mono", monospace`;
+  ctx.fillStyle = '#16221F';
+
+  lines.forEach((line, i) => {
+    ctx.fillText(line, 0, 8 + i * lineHeight);
+  });
+}
+
+const OWNER_LINES = ['Sm9uYXRoYW4gUml2ZXJh', 'TWFpbmF1c3RyLiA0MQ==', 'ODEyNDMgTcO8bmNoZW4='];
+const CONTACT_LINES = ['RS1NYWlsOiBmcmVpbG90c2VAb3V0bG9vay5kZQ=='];
+
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>{
+    renderTextCanvas('ownerCanvas', OWNER_LINES);
+    renderTextCanvas('contactCanvas', CONTACT_LINES);
+  });
+} else {
+  renderTextCanvas('ownerCanvas', OWNER_LINES);
+  renderTextCanvas('contactCanvas', CONTACT_LINES);
+}
+</script>
+</body>
+</html>

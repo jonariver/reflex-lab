@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>REFLEX LAB — Changelog</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .changelog-inner{
+    flex:1;
+    display:flex;
+    flex-direction: column;
+    padding: 32px 24px;
+    text-align:left;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  .back-link{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    align-self: flex-start;
+  }
+  .back-links{
+    display:flex;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .changelog-title{
+    font-family: var(--font-display);
+    font-size: 24px;
+    margin: 0 0 20px;
+  }
+  .changelog-list{
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding-right: 4px;
+  }
+  .changelog-entry-date{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--signal);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .changelog-entry-title{
+    font-family: var(--font-display);
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .changelog-entry-desc{
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="device">
+    <div id="device-header">
+      <div id="device-label">REFLEX LAB · MODELL RX-4</div>
+      <div id="device-dot"></div>
+    </div>
+    <div id="screen">
+      <div class="changelog-inner" id="app"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Neues Feature? Hier oben einen neuen Eintrag einfügen (neueste zuerst).
+const CHANGELOG = [
+  {
+    date: '28.7.2026',
+    title: 'Achievements',
+    desc: 'Sechs Badges für besondere Leistungen (z.B. Blitzreflex, Perfekte Präzision, Hardcore) tauchen im Laborbericht auf, wenn sie freigeschaltet werden.',
+  },
+  {
+    date: '28.7.2026',
+    title: 'Tages-Streak',
+    desc: 'Wer an aufeinanderfolgenden Tagen spielt, sammelt eine Serie — sichtbar auf dem Startbildschirm und im Laborbericht.',
+  },
+  {
+    date: '28.7.2026',
+    title: 'Desktop-Ansicht überarbeitet',
+    desc: 'Auf größeren Bildschirmen ist das Gerät jetzt spürbar größer und länger, damit nichts mehr gestaucht wirkt.',
+  },
+  {
+    date: '28.7.2026',
+    title: 'Schwierigkeitsgrade',
+    desc: 'Leicht/Normal/Schwer wählbar auf dem Startbildschirm — verändert Tempo, Zielgrößen und Gedächtnis-Länge in allen vier Tests.',
+  },
+  {
+    date: '28.7.2026',
+    title: 'Mobile-Feinschliff',
+    desc: 'Größere Präzisions-Ziele, Timing-Test per Tap auf den ganzen Screen stoppbar, Bildschirm füllt auf dem Handy die volle Höhe.',
+  },
+  {
+    date: '28.7.2026',
+    title: 'Score-Teilen verbessert',
+    desc: 'Der geteilte Link und Text zeigen jetzt die komplette Punkte-Aufschlüsselung statt nur den nackten Link.',
+  },
+  {
+    date: '28.7.2026',
+    title: 'Reflex Lab Start',
+    desc: 'Launch mit 4 Tages-Tests (Reaktion, Timing, Gedächtnis, Präzision), Laborbericht, Share-Link und Share-Card.',
+  },
+];
+
+const app = document.getElementById('app');
+app.innerHTML = `
+  <div class="back-links">
+    <a class="back-link" href="index.html">← Zurück</a>
+    <a class="back-link" href="impressum.html">Impressum</a>
+    <a class="back-link" href="datenschutz.html">Datenschutz</a>
+  </div>
+  <h1 class="changelog-title">CHANGELOG</h1>
+  <div class="changelog-list">
+    ${CHANGELOG.map(entry => `
+      <div class="changelog-entry">
+        <div class="changelog-entry-date">${entry.date}</div>
+        <div class="changelog-entry-title">${entry.title}</div>
+        <div class="changelog-entry-desc">${entry.desc}</div>
+      </div>
+    `).join('')}
+  </div>
+`;
+</script>
+</body>
+</html>

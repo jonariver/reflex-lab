@@ -4,159 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>REFLEX LAB — Test dein Nervensystem</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 <style>
-  :root{
-    --paper: #EDF1EC;
-    --paper-dim: #DCE4DD;
-    --ink: #16221F;
-    --ink-soft: #4A5A55;
-    --signal: #E2412C;
-    --signal-dim: #F3C8C2;
-    --teal: #3F6D66;
-    --yellow: #F2B705;
-    --device: #1C2523;
-    --device-edge: #0D1211;
-    --screen-glow: 0 0 0 1px rgba(0,0,0,0.05) inset;
-    --font-display: 'Archivo Black', sans-serif;
-    --font-mono: 'Space Mono', monospace;
-    --font-body: 'Inter', sans-serif;
-  }
-
-  *{ box-sizing: border-box; }
-
-  html, body{
-    margin:0; padding:0; height:100%;
-    background: var(--device-edge);
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.03), transparent 40%),
-      radial-gradient(circle at 80% 90%, rgba(255,255,255,0.03), transparent 40%);
-    font-family: var(--font-body);
-    color: var(--ink);
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-
-  #stage{
-    min-height: 100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding: 24px 16px;
-  }
-
-  #device{
-    width: 100%;
-    max-width: 420px;
-    background: linear-gradient(160deg, #232F2C, #171F1D);
-    border-radius: 32px;
-    padding: 18px 18px 26px;
-    box-shadow:
-      0 30px 60px -20px rgba(0,0,0,0.6),
-      0 0 0 1px rgba(255,255,255,0.04) inset;
-  }
-
-  #device-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding: 4px 8px 14px;
-  }
-
-  #device-label{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    color: rgba(237,241,236,0.5);
-    text-transform: uppercase;
-  }
-
-  #device-dot{
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--signal);
-    box-shadow: 0 0 8px 1px rgba(226,65,44,0.7);
-  }
-
-  #screen{
-    position: relative;
-    background: var(--paper);
-    border-radius: 18px;
-    min-height: 520px;
-    box-shadow: var(--screen-glow);
-    overflow: hidden;
-    display:flex;
-    flex-direction: column;
-  }
-
-  @media (max-width: 480px){
-    #stage{ padding: 12px; }
-    #device{ max-width: 100%; }
-    #screen{
-      min-height: calc(100vh - 110px);
-      min-height: calc(100dvh - 110px);
-    }
-  }
-
-  .screen-inner{
-    flex:1;
-    display:flex;
-    flex-direction: column;
-    align-items: center;
+  /* ---------- Achievement badges ---------- */
+  .achievements{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     justify-content: center;
-    padding: 32px 24px;
-    text-align:center;
-    height: 100%;
-    width: 100%;
+    margin: 12px 0 0;
   }
-
-  /* ---------- Typography ---------- */
-  h1.display{
-    font-family: var(--font-display);
-    font-size: 30px;
-    line-height: 1.05;
-    margin: 0 0 6px;
-    letter-spacing: -0.01em;
-  }
-
-  .eyebrow{
+  .achievement-badge{
     font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--signal);
-    margin-bottom: 10px;
+    font-size: 10.5px;
     font-weight: 700;
-  }
-
-  p.sub{
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--ink-soft);
-    margin: 0 0 28px;
-    max-width: 280px;
-  }
-
-  /* ---------- Buttons ---------- */
-  button{
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 15px;
-    border: none;
-    cursor: pointer;
-    border-radius: 10px;
-    padding: 16px 28px;
-    background: var(--ink);
-    color: var(--paper);
-    transition: transform 0.08s ease;
-  }
-  button:active{ transform: scale(0.96); }
-  button.ghost{
-    background: transparent;
     color: var(--ink);
-    box-shadow: 0 0 0 2px var(--ink) inset;
+    background: var(--yellow);
+    padding: 5px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
   }
-  button.signal{ background: var(--signal); color: var(--paper); }
+
+  /* ---------- Streak badge ---------- */
+  .streak-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--paper-dim);
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+
+  /* ---------- Text link ---------- */
+  .text-link{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 
   /* ---------- Challenge stats ---------- */
   .challenge-stats{
@@ -514,6 +405,35 @@ const todayLabel = new Date().toLocaleDateString('de-DE');
 let rng = mulberry32(dateSeed());
 function resetDailyRng(){ rng = mulberry32(dateSeed()); }
 
+/* ---------------- STREAK ---------------- */
+const STREAK_KEY = 'reflexlab_streak';
+
+function todayISO(){ return new Date().toISOString().slice(0, 10); }
+function isoDaysAgo(n){
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+function readStreak(){
+  try{
+    const data = JSON.parse(localStorage.getItem(STREAK_KEY));
+    if(data && typeof data.count === 'number' && typeof data.lastDate === 'string') return data;
+  }catch(err){ /* fällt durch zum Standardwert */ }
+  return { count: 0, lastDate: null };
+}
+
+function peekStreak(){ return readStreak().count; }
+
+function markPlayedToday(){
+  const today = todayISO();
+  const data = readStreak();
+  if(data.lastDate === today) return data.count;
+  const newCount = (data.lastDate === isoDaysAgo(1)) ? data.count + 1 : 1;
+  localStorage.setItem(STREAK_KEY, JSON.stringify({ count: newCount, lastDate: today }));
+  return newCount;
+}
+
 /* ---------------- SHARE LINK ---------------- */
 function encodeChallenge(obj){
   const json = JSON.stringify(obj);
@@ -596,6 +516,7 @@ function renderIntro(){
       <div class="eyebrow">Tages-Challenge · ${c.date || todayLabel}</div>
       <h1 class="display" style="font-size:24px;">HERAUSGEFORDERT</h1>
       <p class="sub">Jemand hat heute auf <strong>${DIFFICULTIES[challengeDiff].label}</strong> <strong>${c.overall}/100</strong> erreicht — Diagnose: „${c.diag}“. Schaffst du mehr?</p>
+      ${peekStreak() > 0 ? `<div class="streak-badge">🔥 ${peekStreak()} ${peekStreak() === 1 ? 'Tag' : 'Tage'} in Folge</div>` : ''}
       <div class="challenge-stats">
         <div class="row"><span>REAKTION</span><span>${c.r}ms</span></div>
         <div class="row"><span>TIMING</span><span>${c.t}%</span></div>
@@ -614,10 +535,18 @@ function renderIntro(){
     <div class="eyebrow">Tages-Challenge · ${todayLabel}</div>
     <h1 class="display">REFLEX LAB</h1>
     <p class="sub">Wir testen Reaktion, Timing, Gedächtnis und Präzision. Heute haben alle die gleiche Challenge — am Ende bekommst du deinen Laborbericht.</p>
+    ${peekStreak() > 0 ? `<div class="streak-badge">🔥 ${peekStreak()} ${peekStreak() === 1 ? 'Tag' : 'Tage'} in Folge</div>` : ''}
     <div class="diff-picker">
       ${Object.keys(DIFFICULTIES).map(key => `<button class="diff-chip${key === difficulty ? ' active' : ''}" data-diff="${key}">${DIFFICULTIES[key].label}</button>`).join('')}
     </div>
     <button class="signal" id="startBtn">Test starten</button>
+    <div style="margin-top:16px;">
+      <a class="text-link" href="changelog.html">Was gibt's Neues?</a>
+      <span class="text-link" style="text-decoration:none;"> · </span>
+      <a class="text-link" href="impressum.html">Impressum</a>
+      <span class="text-link" style="text-decoration:none;"> · </span>
+      <a class="text-link" href="datenschutz.html">Datenschutz</a>
+    </div>
   `;
   document.querySelectorAll('.diff-chip').forEach(chip=>{
     chip.onclick = ()=>{ setDifficulty(chip.dataset.diff); renderIntro(); };
@@ -815,7 +744,7 @@ function renderPrecision(){
     <div class="precision-field" id="field"></div>
   `;
   const field = document.getElementById('field');
-  const fieldRect = () => field.getBoundingClientRect();
+  const fieldRect = () => ({ width: field.offsetWidth, height: field.offsetHeight });
   let round = 0;
   const results = [];
   const isMobilePrecision = window.matchMedia('(max-width: 480px)').matches;
@@ -934,6 +863,50 @@ function diagnosisFor(score){
   return pick(DIAGNOSES.s0);
 }
 
+/* ---------------- ACHIEVEMENTS ---------------- */
+const ACHIEVEMENTS = [
+  {
+    icon: '⚡',
+    label: 'Blitzreflex',
+    desc: 'Unter 200ms reagiert',
+    check: (s) => s.reaction.ms < 200,
+  },
+  {
+    icon: '🎯',
+    label: 'Volltreffer',
+    desc: 'Timing fast exakt in der Mitte gestoppt',
+    check: (s) => s.timing.accuracy >= 99,
+  },
+  {
+    icon: '🧠',
+    label: 'Fotografisches Gedächtnis',
+    desc: 'Gedächtnis-Sequenz fehlerfrei',
+    check: (s) => s.memory.correct === s.memory.total,
+  },
+  {
+    icon: '📍',
+    label: 'Perfekte Präzision',
+    desc: 'Alle Ziele fast im Zentrum getroffen',
+    check: (s) => s.precision.score >= 95,
+  },
+  {
+    icon: '🏆',
+    label: 'Elite-Reflexe',
+    desc: 'Gesamtscore von 90+ erreicht',
+    check: (s, overall) => overall >= 90,
+  },
+  {
+    icon: '💀',
+    label: 'Hardcore',
+    desc: 'Auf Schwer gespielt',
+    check: (s, overall, diff) => diff === 'schwer',
+  },
+];
+
+function unlockedAchievements(s, overall, diff){
+  return ACHIEVEMENTS.filter(a => a.check(s, overall, diff));
+}
+
 function renderResult(){
   progressEl.innerHTML = '';
   const r = scores.reaction, t = scores.timing, m = scores.memory, p = scores.precision;
@@ -942,6 +915,8 @@ function renderResult(){
   );
   const diag = diagnosisFor(overall);
   const diffLabel = DIFFICULTIES[difficulty].label;
+  const streak = markPlayedToday();
+  const achievements = unlockedAchievements(scores, overall, difficulty);
 
   const shareText =
 `🧪 REFLEX LAB — TAGES-CHALLENGE ${todayLabel}
@@ -971,9 +946,11 @@ Schlag das → `;
       <div class="receipt-row"><span>TIMING</span><span>${t.accuracy}%</span></div>
       <div class="receipt-row"><span>GEDÄCHTNIS</span><span>${m.correct}/${m.total}</span></div>
       <div class="receipt-row"><span>PRÄZISION</span><span>${p.score}%</span></div>
+      ${achievements.length ? `<hr><div class="achievements">${achievements.map(a => `<span class="achievement-badge" title="${a.desc}">${a.icon} ${a.label}</span>`).join('')}</div>` : ''}
       <hr>
       <div style="text-align:center; font-size:10px; color:var(--ink-soft);">ENDE DER PRÜFUNG</div>
     </div>
+    ${streak > 1 ? `<div class="streak-badge" style="margin: 18px auto 0; display:flex;">🔥 ${streak} Tage in Folge</div>` : ''}
     <div class="result-actions">
       <button class="ghost" id="againBtn">Nochmal</button>
       <button class="signal" id="linkBtn">Link teilen</button>
