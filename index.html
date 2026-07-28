@@ -149,6 +149,26 @@
   }
   button.signal{ background: var(--signal); color: var(--paper); }
 
+  /* ---------- Challenge stats ---------- */
+  .challenge-stats{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    width: 100%;
+    max-width: 220px;
+    margin: -12px 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .challenge-stats .row{
+    display:flex; justify-content: space-between;
+    color: var(--ink-soft);
+  }
+  .challenge-stats .row span:last-child{
+    color: var(--ink);
+    font-weight: 700;
+  }
+
   /* ---------- Progress dots ---------- */
   #progress{
     position:absolute;
@@ -502,6 +522,12 @@ function renderIntro(){
       <div class="eyebrow">Tages-Challenge · ${c.date || todayLabel}</div>
       <h1 class="display" style="font-size:24px;">HERAUSGEFORDERT</h1>
       <p class="sub">Jemand hat heute <strong>${c.overall}/100</strong> erreicht — Diagnose: „${c.diag}“. Schaffst du mehr?</p>
+      <div class="challenge-stats">
+        <div class="row"><span>REAKTION</span><span>${c.r}ms</span></div>
+        <div class="row"><span>TIMING</span><span>${c.t}%</span></div>
+        <div class="row"><span>GEDÄCHTNIS</span><span>${c.m}</span></div>
+        <div class="row"><span>PRÄZISION</span><span>${c.p}%</span></div>
+      </div>
       <button class="signal" id="startBtn">Challenge annehmen</button>
       <button class="ghost" id="skipBtn" style="margin-top:10px;">Eigene Runde starten</button>
     `;
