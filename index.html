@@ -662,7 +662,7 @@ function renderTiming(){
   }
 
   if(isMobile){
-    app.addEventListener('click', stop);
+    setTimeout(()=> app.addEventListener('click', stop), 0);
   } else {
     document.getElementById('stopBtn').onclick = stop;
   }
