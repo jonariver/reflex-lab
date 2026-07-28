@@ -622,15 +622,16 @@ function renderReaction(){
 
 /* ---------------- TEST 2: TIMING ---------------- */
 function renderTiming(){
+  const isMobile = window.matchMedia('(max-width: 480px)').matches;
   app.innerHTML = `
     <div class="eyebrow">Test 2 / 4</div>
     <h1 class="display" style="font-size:22px;">TIMING</h1>
-    <p class="sub">Stoppe die Nadel in der Zielzone.</p>
+    <p class="sub">${isMobile ? 'Tippe irgendwo auf den Screen, wenn die Nadel in der Zielzone ist.' : 'Stoppe die Nadel in der Zielzone.'}</p>
     <div class="timing-track">
       <div class="timing-target"></div>
       <div class="timing-needle" id="needle"></div>
     </div>
-    <button class="ghost" id="stopBtn">STOPPEN</button>
+    ${isMobile ? '' : '<button class="ghost" id="stopBtn">STOPPEN</button>'}
   `;
   const track = document.querySelector('.timing-track');
   const needle = document.getElementById('needle');
@@ -650,14 +651,21 @@ function renderTiming(){
   }
   requestAnimationFrame(tick);
 
-  document.getElementById('stopBtn').onclick = ()=>{
+  function stop(){
+    if(!running) return;
     running = false;
     const center = trackWidth * 0.5;
     const dist = Math.abs(pos - center);
     const accuracy = Math.round(mapRange(dist, 0, trackWidth * 0.5, 100, 0));
     scores.timing = { accuracy, score: accuracy };
     nextTest();
-  };
+  }
+
+  if(isMobile){
+    app.addEventListener('click', stop);
+  } else {
+    document.getElementById('stopBtn').onclick = stop;
+  }
 }
 
 /* ---------------- TEST 3: MEMORY ---------------- */
@@ -731,7 +739,7 @@ function renderPrecision(){
   const fieldRect = () => field.getBoundingClientRect();
   let round = 0;
   const results = [];
-  const SIZE_START = 70;
+  const SIZE_START = window.matchMedia('(max-width: 480px)').matches ? 140 : 70;
 
   function spawnTarget(){
     const size = SIZE_START;
