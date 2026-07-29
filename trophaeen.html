@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>REFLEX LAB — Trophäen</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1C2523">
+<link rel="icon" href="icons/icon-32.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .trophies-inner{
+    flex:1;
+    display:flex;
+    flex-direction: column;
+    padding: 32px 24px;
+    text-align:left;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  .back-link{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    align-self: flex-start;
+  }
+  .back-links{
+    display:flex;
+    gap: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .trophies-title{
+    font-family: var(--font-display);
+    font-size: 24px;
+    margin: 0 0 4px;
+  }
+  .trophies-progress{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+  .trophies-list{
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+    margin-bottom: 16px;
+  }
+  .trophy-card{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--paper-dim);
+  }
+  .trophy-card.locked{
+    filter: grayscale(1);
+    opacity: 0.55;
+  }
+  .trophy-icon{
+    font-size: 24px;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .trophy-info{
+    flex: 1;
+    min-width: 0;
+  }
+  .trophy-label{
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .trophy-desc{
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .trophy-date{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal);
+    margin-top: 3px;
+  }
+  .trophies-share{
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="device">
+    <div id="device-header">
+      <div id="device-label">REFLEX LAB · MODELL RX-4</div>
+      <div id="device-dot"></div>
+    </div>
+    <div id="screen">
+      <div class="trophies-inner" id="app"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Duplikat aus index.html — kein Modulsystem vorhanden, Seiten sind bewusst eigenständig.
+const ACHIEVEMENTS = [
+  { id: 'blitz', icon: '⚡', label: 'Blitzreflex', desc: 'Unter 200ms reagiert' },
+  { id: 'volltreffer', icon: '🎯', label: 'Volltreffer', desc: 'Timing fast exakt in der Mitte gestoppt' },
+  { id: 'gedaechtnis', icon: '🧠', label: 'Fotografisches Gedächtnis', desc: 'Gedächtnis-Sequenz fehlerfrei' },
+  { id: 'praezision', icon: '📍', label: 'Perfekte Präzision', desc: 'Alle Ziele fast im Zentrum getroffen' },
+  { id: 'elite', icon: '🏆', label: 'Elite-Reflexe', desc: 'Gesamtscore von 90+ erreicht' },
+  { id: 'hardcore', icon: '💀', label: 'Hardcore', desc: 'Auf Schwer gespielt' },
+  { id: 'nachteule', icon: '🌙', label: 'Nachteule', desc: 'Zwischen Mitternacht und 5 Uhr gespielt' },
+  { id: 'alleskoenner', icon: '✨', label: 'Alleskönner', desc: 'Alle vier Tests über 85 Punkte in einer Runde' },
+  { id: 'vollstaendig', icon: '🎪', label: 'Vollständig', desc: 'Schon mal auf Leicht, Normal und Schwer gespielt' },
+  { id: 'serientaeter', icon: '🔥', label: 'Serientäter', desc: '7 Tage in Folge gespielt' },
+  { id: 'comeback', icon: '📈', label: 'Comeback', desc: 'Nach einer Runde unter 40 direkt danach 80+ erreicht' },
+  { id: 'publikumsliebling', icon: '🥇', label: 'Publikumsliebling', desc: 'In der Tages-Bestenliste unter den Top 3 gelandet' },
+];
+
+const TROPHIES_KEY = 'reflexlab_trophies';
+function readTrophies(){
+  try{
+    const data = JSON.parse(localStorage.getItem(TROPHIES_KEY));
+    if(data && typeof data === 'object') return data;
+  }catch(err){ /* fällt durch zum Standardwert */ }
+  return {};
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDate(iso){
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+const trophies = readTrophies();
+const unlockedCount = ACHIEVEMENTS.filter(a => trophies[a.id]).length;
+
+const app = document.getElementById('app');
+app.innerHTML = `
+  <div class="back-links">
+    <a class="back-link" href="index.html">← Zurück</a>
+    <a class="back-link" href="changelog.html">Changelog</a>
+    <a class="back-link" href="impressum.html">Impressum</a>
+    <a class="back-link" href="datenschutz.html">Datenschutz</a>
+  </div>
+  <h1 class="trophies-title">TROPHÄEN</h1>
+  <div class="trophies-progress">${unlockedCount} / ${ACHIEVEMENTS.length} freigeschaltet</div>
+  <div class="trophies-list">
+    ${ACHIEVEMENTS.map(a => {
+      const unlockedDate = trophies[a.id];
+      return `
+        <div class="trophy-card${unlockedDate ? '' : ' locked'}">
+          <div class="trophy-icon">${unlockedDate ? a.icon : '🔒'}</div>
+          <div class="trophy-info">
+            <div class="trophy-label">${escapeHtml(a.label)}</div>
+            <div class="trophy-desc">${escapeHtml(a.desc)}</div>
+            ${unlockedDate ? `<div class="trophy-date">Freigeschaltet am ${formatDate(unlockedDate)}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('')}
+  </div>
+  <button class="ghost trophies-share" id="shareTrophiesBtn">Sammlung teilen</button>
+`;
+
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function dashedLine(ctx, x1, y, x2, y2){
+  ctx.save();
+  ctx.strokeStyle = '#c9c9c9';
+  ctx.setLineDash([6, 5]);
+  ctx.beginPath();
+  ctx.moveTo(x1, y);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawBadges(ctx, badges, startY, W){
+  const padX = 40;
+  const maxWidth = W - padX * 2;
+  const gap = 10;
+  const pillHeight = 34;
+  const lineGap = 10;
+
+  ctx.font = '700 15px "Space Mono", monospace';
+  const items = badges.map(b => {
+    const text = `${b.icon} ${b.label}`;
+    return { text, w: ctx.measureText(text).width + 24 };
+  });
+
+  const rows = [];
+  let currentRow = [];
+  let currentWidth = 0;
+  items.forEach(item => {
+    if(currentRow.length && currentWidth + gap + item.w > maxWidth){
+      rows.push(currentRow);
+      currentRow = [];
+      currentWidth = 0;
+    }
+    currentRow.push(item);
+    currentWidth += (currentRow.length > 1 ? gap : 0) + item.w;
+  });
+  if(currentRow.length) rows.push(currentRow);
+
+  let y = startY;
+  rows.forEach(row => {
+    const rowWidth = row.reduce((sum, item) => sum + item.w, 0) + gap * (row.length - 1);
+    let x = (W - rowWidth) / 2;
+    row.forEach(item => {
+      ctx.fillStyle = '#F2B705';
+      roundRect(ctx, x, y, item.w, pillHeight, pillHeight / 2);
+      ctx.fill();
+      ctx.fillStyle = '#16221F';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(item.text, x + 12, y + pillHeight / 2 + 1);
+      x += item.w + gap;
+    });
+    y += pillHeight + lineGap;
+  });
+
+  ctx.textBaseline = 'alphabetic';
+  return y;
+}
+
+function buildTrophyCardCanvas(){
+  const unlocked = ACHIEVEMENTS.filter(a => trophies[a.id]);
+  const W = 640;
+  const H = 320 + Math.ceil(Math.max(unlocked.length, 1) / 2) * 44 + 100;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#EDF1EC';
+  ctx.fillRect(0, 0, W, 64);
+
+  const centerX = W / 2;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#4A5A55';
+  ctx.font = '700 15px "Space Mono", monospace';
+  ctx.fillText('REFLEX LAB · TROPHÄENSAMMLUNG', centerX, 40);
+
+  ctx.fillStyle = '#16221F';
+  ctx.font = '900 60px "Archivo Black", sans-serif';
+  ctx.fillText(`${unlocked.length}/${ACHIEVEMENTS.length}`, centerX, 150);
+
+  ctx.fillStyle = '#4A5A55';
+  ctx.font = '400 15px Inter, sans-serif';
+  ctx.fillText('Trophäen freigeschaltet', centerX, 185);
+
+  dashedLine(ctx, 40, 215, W - 40, 215);
+
+  let endY = 245;
+  if(unlocked.length){
+    endY = drawBadges(ctx, unlocked, 245, W);
+  } else {
+    ctx.fillStyle = '#4A5A55';
+    ctx.font = '400 15px Inter, sans-serif';
+    ctx.fillText('Noch keine Trophäe freigeschaltet — leg los!', centerX, 270);
+    endY = 290;
+  }
+
+  ctx.fillStyle = '#16221F';
+  ctx.font = '700 16px Inter, sans-serif';
+  ctx.fillText('Schlag das 👉', centerX, endY + 40);
+
+  ctx.fillStyle = '#EDF1EC';
+  const teeth = 20;
+  const toothWidth = W / teeth;
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  for(let i = 0; i <= teeth; i++){
+    const x = i * toothWidth;
+    ctx.lineTo(x, H - (i % 2 === 0 ? 14 : 0));
+  }
+  ctx.lineTo(W, H);
+  ctx.closePath();
+  ctx.fill();
+
+  return canvas;
+}
+
+document.getElementById('shareTrophiesBtn').onclick = async ()=>{
+  if(document.fonts && document.fonts.ready){ await document.fonts.ready; }
+  const canvas = buildTrophyCardCanvas();
+  const shareText = `🏆 REFLEX LAB — Meine Trophäensammlung: ${unlockedCount}/${ACHIEVEMENTS.length}\nSchlag das → ${window.location.origin + window.location.pathname.replace('trophaeen.html','index.html')}`;
+
+  canvas.toBlob(async (blob)=>{
+    if(!blob) return;
+    const file = new File([blob], 'reflex-lab-trophaeen.png', { type: 'image/png' });
+
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      try{
+        await navigator.share({ files: [file], title: 'Reflex Lab Trophäen', text: shareText });
+        return;
+      }catch(err){ /* Nutzer hat abgebrochen — Fallback unten */ }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'reflex-lab-trophaeen.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+};
+</script>
+</body>
+</html>

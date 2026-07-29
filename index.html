@@ -111,6 +111,14 @@
     border-radius: 20px;
     white-space: nowrap;
   }
+  .new-tag{
+    background: var(--signal);
+    color: #fff;
+    font-size: 8.5px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    margin-left: 5px;
+  }
 
   /* ---------- Streak badge ---------- */
   .streak-badge{
@@ -381,6 +389,262 @@
     color: var(--ink);
     margin-bottom: 14px;
   }
+
+  /* ---------- REX Maskottchen ---------- */
+  .rex-mascot{
+    --pixel: 6px;
+    --state-color: var(--signal);
+    position: relative;
+    width: calc(var(--pixel) * 18);
+    height: calc(var(--pixel) * 20);
+    margin: 4px auto 18px;
+    flex-shrink: 0;
+    image-rendering: pixelated;
+  }
+  .rex-mascot .rex{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: rex-idle-body 1.8s steps(4, end) infinite;
+  }
+  .rex-mascot .antenna{
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: calc(var(--pixel) * 8);
+    width: calc(var(--pixel) * 2);
+    height: calc(var(--pixel) * 5);
+    transform-origin: 50% 100%;
+    transition: transform .2s steps(2, end);
+  }
+  .rex-mascot .antenna::before{
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: calc(var(--pixel) * .5);
+    width: var(--pixel);
+    height: calc(var(--pixel) * 4);
+    background: var(--ink-soft);
+  }
+  .rex-mascot .antenna::after{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(var(--pixel) * 2);
+    height: calc(var(--pixel) * 2);
+    background: var(--state-color);
+    border: calc(var(--pixel) * .5) solid var(--device-edge);
+    box-sizing: content-box;
+    box-shadow: 0 0 10px rgba(226,65,44,.35);
+    transition: background .18s steps(2, end);
+  }
+  .rex-mascot .ear{
+    position: absolute;
+    z-index: 1;
+    top: calc(var(--pixel) * 7);
+    width: calc(var(--pixel) * 2);
+    height: calc(var(--pixel) * 6);
+    background: var(--ink);
+    border-block: var(--pixel) solid var(--device-edge);
+  }
+  .rex-mascot .ear.left{ left: 0; border-left: var(--pixel) solid var(--device-edge); }
+  .rex-mascot .ear.right{ right: 0; border-right: var(--pixel) solid var(--device-edge); }
+  .rex-mascot .head{
+    position: absolute;
+    z-index: 2;
+    top: calc(var(--pixel) * 4);
+    left: calc(var(--pixel) * 2);
+    width: calc(var(--pixel) * 14);
+    height: calc(var(--pixel) * 11);
+    border: var(--pixel) solid var(--device-edge);
+    background: var(--ink);
+    box-shadow:
+      inset calc(var(--pixel) * -1) calc(var(--pixel) * -1) 0 var(--device-edge),
+      inset var(--pixel) var(--pixel) 0 var(--ink-soft);
+  }
+  .rex-mascot .faceplate{
+    position: absolute;
+    inset: calc(var(--pixel) * 2) var(--pixel) var(--pixel);
+    background: var(--device-edge);
+    border: var(--pixel) solid var(--device-edge);
+  }
+  .rex-mascot .eye{
+    position: absolute;
+    top: var(--pixel);
+    left: var(--pixel);
+    width: calc(var(--pixel) * 4);
+    height: calc(var(--pixel) * 3);
+    background: var(--state-color);
+    box-shadow: 0 0 14px rgba(226,65,44,.35);
+    transition: all .18s steps(2, end), background .18s steps(2, end);
+    animation: rex-eye-blink 4.4s steps(1, end) infinite;
+  }
+  .rex-mascot .eye::after{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--pixel);
+    height: var(--pixel);
+    background: var(--signal-dim);
+  }
+  .rex-mascot .brow{
+    position: absolute;
+    top: 0;
+    left: var(--pixel);
+    width: calc(var(--pixel) * 4);
+    height: var(--pixel);
+    background: var(--ink-soft);
+    transform-origin: left center;
+    transition: transform .18s steps(2, end);
+  }
+  .rex-mascot .mouth{
+    position: absolute;
+    right: var(--pixel);
+    bottom: var(--pixel);
+    width: calc(var(--pixel) * 3);
+    height: var(--pixel);
+    background: var(--ink-soft);
+    transition: all .18s steps(2, end);
+  }
+  .rex-mascot .bolt{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: var(--pixel);
+    height: var(--pixel);
+    background: var(--ink-soft);
+  }
+  .rex-mascot .neck{
+    position: absolute;
+    z-index: 1;
+    left: calc(var(--pixel) * 7);
+    top: calc(var(--pixel) * 14);
+    width: calc(var(--pixel) * 4);
+    height: calc(var(--pixel) * 2);
+    border-inline: var(--pixel) solid var(--device-edge);
+    background: var(--device-edge);
+  }
+  .rex-mascot .foot{
+    position: absolute;
+    z-index: 0;
+    top: calc(var(--pixel) * 15);
+    width: calc(var(--pixel) * 6);
+    height: calc(var(--pixel) * 4);
+    background: var(--ink);
+    border: var(--pixel) solid var(--device-edge);
+    transition: transform .2s steps(2, end);
+  }
+  .rex-mascot .foot.left{ left: calc(var(--pixel) * 2); }
+  .rex-mascot .foot.right{ right: calc(var(--pixel) * 2); }
+  .rex-mascot .feet-base{
+    position: absolute;
+    top: calc(var(--pixel) * 18);
+    left: var(--pixel);
+    width: calc(var(--pixel) * 16);
+    height: calc(var(--pixel) * 2);
+  }
+  .rex-mascot .feet-base::before,
+  .rex-mascot .feet-base::after{
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: calc(var(--pixel) * 6);
+    height: var(--pixel);
+    background: var(--device-edge);
+  }
+  .rex-mascot .feet-base::before{ left: 0; }
+  .rex-mascot .feet-base::after{ right: 0; }
+  .rex-mascot .spark{
+    position: absolute;
+    z-index: 4;
+    width: var(--pixel);
+    height: var(--pixel);
+    background: var(--state-color);
+    opacity: 0;
+  }
+  .rex-mascot .spark.one{ top: 12%; left: 18%; }
+  .rex-mascot .spark.two{ top: 20%; right: 16%; }
+  .rex-mascot .spark.three{ top: 48%; right: 10%; }
+
+  /* Fokus */
+  .rex-mascot--focus .rex{ animation: rex-focus-body .45s steps(2, end) infinite; }
+  .rex-mascot--focus .antenna{ animation: rex-antenna-alert .32s steps(2, end) infinite; }
+  .rex-mascot--focus .eye{
+    width: calc(var(--pixel) * 5);
+    height: calc(var(--pixel) * 2);
+    animation: rex-eye-scan .55s steps(3, end) infinite;
+  }
+  .rex-mascot--focus .brow{ transform: translateY(calc(var(--pixel) * -0.4)) rotate(-8deg); }
+  .rex-mascot--focus .mouth{ width: calc(var(--pixel) * 2); right: calc(var(--pixel) * 1.5); }
+
+  /* Neuer Rekord */
+  .rex-mascot--record{ --state-color: var(--yellow); }
+  .rex-mascot--record .rex{ animation: rex-record-hop .7s steps(4, end) infinite; }
+  .rex-mascot--record .antenna{ animation: rex-antenna-cheer .35s steps(2, end) infinite alternate; }
+  .rex-mascot--record .eye{
+    width: calc(var(--pixel) * 4);
+    height: calc(var(--pixel) * 4);
+    transform: translateY(calc(var(--pixel) * -0.5));
+    animation: rex-record-eye .5s steps(2, end) infinite;
+  }
+  .rex-mascot--record .brow{ transform: translateY(calc(var(--pixel) * -0.5)); }
+  .rex-mascot--record .mouth{
+    width: calc(var(--pixel) * 4);
+    height: calc(var(--pixel) * 2);
+    right: calc(var(--pixel) * .5);
+    bottom: calc(var(--pixel) * .5);
+    background: linear-gradient(to bottom, transparent 0 50%, var(--ink-soft) 50% 100%);
+    border-inline: var(--pixel) solid var(--ink-soft);
+  }
+  .rex-mascot--record .spark{ animation: rex-spark-pop .7s steps(3, end) infinite; }
+  .rex-mascot--record .spark.two{ animation-delay: .18s; }
+  .rex-mascot--record .spark.three{ animation-delay: .32s; }
+
+  /* Zu langsam */
+  .rex-mascot--slow{ --state-color: var(--ink-soft); }
+  .rex-mascot--slow .rex{ animation: rex-slow-sink 1.6s steps(3, end) infinite; }
+  .rex-mascot--slow .antenna{ transform: rotate(54deg) translate(calc(var(--pixel) * .5), calc(var(--pixel) * .4)); }
+  .rex-mascot--slow .antenna::after{ opacity: .5; box-shadow: none; }
+  .rex-mascot--slow .eye{
+    width: calc(var(--pixel) * 4);
+    height: var(--pixel);
+    top: calc(var(--pixel) * 2);
+    opacity: .55;
+    box-shadow: none;
+    animation: none;
+  }
+  .rex-mascot--slow .brow{ transform: translateY(var(--pixel)) rotate(10deg); }
+  .rex-mascot--slow .mouth{
+    width: calc(var(--pixel) * 3);
+    height: calc(var(--pixel) * 2);
+    right: var(--pixel);
+    bottom: 0;
+    background: linear-gradient(135deg, transparent 0 36%, var(--ink-soft) 36% 62%, transparent 62%);
+  }
+  .rex-mascot--slow .foot.left{ transform: translateX(var(--pixel)); }
+  .rex-mascot--slow .foot.right{ transform: translateX(calc(var(--pixel) * -1)); }
+
+  @keyframes rex-idle-body{ 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(var(--pixel) * -0.5)); } }
+  @keyframes rex-eye-blink{ 0%, 44%, 48%, 100% { transform: scaleY(1); } 45%, 47% { transform: scaleY(.25); } }
+  @keyframes rex-focus-body{ 50% { transform: translateX(calc(var(--pixel) * .25)); } }
+  @keyframes rex-antenna-alert{ 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+  @keyframes rex-eye-scan{ 0% { transform: translateX(0); } 50% { transform: translateX(var(--pixel)); } 100% { transform: translateX(0); } }
+  @keyframes rex-record-hop{
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(calc(var(--pixel) * -3)) rotate(-3deg); }
+    50% { transform: translateY(calc(var(--pixel) * -1)) rotate(0); }
+    75% { transform: translateY(calc(var(--pixel) * -3)) rotate(3deg); }
+  }
+  @keyframes rex-antenna-cheer{ from { transform: rotate(-24deg); } to { transform: rotate(24deg); } }
+  @keyframes rex-record-eye{ 50% { box-shadow: 0 0 22px rgba(242,183,5,.65); } }
+  @keyframes rex-spark-pop{
+    0% { opacity: 0; transform: scale(1) translate(0, 0); }
+    35% { opacity: 1; transform: scale(2) translateY(calc(var(--pixel) * -1)); }
+    100% { opacity: 0; transform: scale(1) translateY(calc(var(--pixel) * -3)); }
+  }
+  @keyframes rex-slow-sink{ 0%, 100% { transform: translateY(var(--pixel)); } 50% { transform: translateY(calc(var(--pixel) * 1.5)); } }
 </style>
 </head>
 <body>
@@ -407,6 +671,31 @@ const toastEl = document.getElementById('toast');
 const TESTS = ['reaction','timing','memory','precision'];
 let currentTestIndex = -1;
 let scores = {};
+
+function rexHTML(state){
+  return `
+    <div class="rex-mascot rex-mascot--${state}" aria-hidden="true">
+      <div class="rex">
+        <div class="antenna"></div>
+        <div class="ear left"></div>
+        <div class="ear right"></div>
+        <div class="head">
+          <div class="faceplate">
+            <div class="brow"></div>
+            <div class="eye"></div>
+            <div class="mouth"></div>
+            <div class="bolt"></div>
+          </div>
+        </div>
+        <div class="neck"></div>
+        <div class="foot left"></div>
+        <div class="foot right"></div>
+        <div class="feet-base"></div>
+        ${state === 'record' ? '<i class="spark one"></i><i class="spark two"></i><i class="spark three"></i>' : ''}
+      </div>
+    </div>
+  `;
+}
 
 function showToast(msg){
   toastEl.textContent = msg;
@@ -721,12 +1010,15 @@ function renderIntro(){
     <h1 class="display">REFLEX LAB</h1>
     <p class="sub">Wir testen Reaktion, Timing, Gedächtnis und Präzision. Heute haben alle die gleiche Challenge — am Ende bekommst du deinen Laborbericht.</p>
     ${peekStreak() > 0 ? `<div class="streak-badge">🔥 ${peekStreak()} ${peekStreak() === 1 ? 'Tag' : 'Tage'} in Folge</div>` : ''}
+    ${rexHTML('neutral')}
     <div class="diff-picker">
       ${Object.keys(DIFFICULTIES).map(key => `<button class="diff-chip${key === difficulty ? ' active' : ''}" data-diff="${key}">${DIFFICULTIES[key].label}</button>`).join('')}
     </div>
     <button class="signal" id="startBtn">Test starten</button>
     <div style="margin-top:16px;">
       <a class="text-link" href="changelog.html">Was gibt's Neues?</a>
+      <span class="text-link" style="text-decoration:none;"> · </span>
+      <a class="text-link" href="trophaeen.html">Trophäen</a>
       <span class="text-link" style="text-decoration:none;"> · </span>
       <a class="text-link" href="impressum.html">Impressum</a>
       <span class="text-link" style="text-decoration:none;"> · </span>
@@ -768,6 +1060,7 @@ function renderReaction(){
 
   app.innerHTML = `
     <div class="reaction-zone wait" id="rzone">
+      ${rexHTML('focus')}
       <div class="reaction-word" id="rword">WARTEN...</div>
       <div class="reaction-hint">Tippe erst wenn's <strong>${target.name}</strong> wird</div>
     </div>
@@ -1055,42 +1348,84 @@ const ACHIEVEMENTS = [
     icon: '⚡',
     label: 'Blitzreflex',
     desc: 'Unter 200ms reagiert',
-    check: (s) => s.reaction.ms < 200,
+    check: (ctx) => ctx.scores.reaction.ms < 200,
   },
   {
     id: 'volltreffer',
     icon: '🎯',
     label: 'Volltreffer',
     desc: 'Timing fast exakt in der Mitte gestoppt',
-    check: (s) => s.timing.accuracy >= 99,
+    check: (ctx) => ctx.scores.timing.accuracy >= 99,
   },
   {
     id: 'gedaechtnis',
     icon: '🧠',
     label: 'Fotografisches Gedächtnis',
     desc: 'Gedächtnis-Sequenz fehlerfrei',
-    check: (s) => s.memory.correct === s.memory.total,
+    check: (ctx) => ctx.scores.memory.correct === ctx.scores.memory.total,
   },
   {
     id: 'praezision',
     icon: '📍',
     label: 'Perfekte Präzision',
     desc: 'Alle Ziele fast im Zentrum getroffen',
-    check: (s) => s.precision.score >= 95,
+    check: (ctx) => ctx.scores.precision.score >= 95,
   },
   {
     id: 'elite',
     icon: '🏆',
     label: 'Elite-Reflexe',
     desc: 'Gesamtscore von 90+ erreicht',
-    check: (s, overall) => overall >= 90,
+    check: (ctx) => ctx.overall >= 90,
   },
   {
     id: 'hardcore',
     icon: '💀',
     label: 'Hardcore',
     desc: 'Auf Schwer gespielt',
-    check: (s, overall, diff) => diff === 'schwer',
+    check: (ctx) => ctx.difficulty === 'schwer',
+  },
+  {
+    id: 'nachteule',
+    icon: '🌙',
+    label: 'Nachteule',
+    desc: 'Zwischen Mitternacht und 5 Uhr gespielt',
+    check: (ctx) => ctx.hour >= 0 && ctx.hour < 5,
+  },
+  {
+    id: 'alleskoenner',
+    icon: '✨',
+    label: 'Alleskönner',
+    desc: 'Alle vier Tests über 85 Punkte in einer Runde',
+    check: (ctx) => ctx.scores.reaction.score > 85 && ctx.scores.timing.score > 85 && ctx.scores.memory.score > 85 && ctx.scores.precision.score > 85,
+  },
+  {
+    id: 'vollstaendig',
+    icon: '🎪',
+    label: 'Vollständig',
+    desc: 'Schon mal auf Leicht, Normal und Schwer gespielt',
+    check: (ctx) => ['leicht', 'normal', 'schwer'].every(d => ctx.playedDifficulties.includes(d)),
+  },
+  {
+    id: 'serientaeter',
+    icon: '🔥',
+    label: 'Serientäter',
+    desc: '7 Tage in Folge gespielt',
+    check: (ctx) => ctx.streak >= 7,
+  },
+  {
+    id: 'comeback',
+    icon: '📈',
+    label: 'Comeback',
+    desc: 'Nach einer Runde unter 40 direkt danach 80+ erreicht',
+    check: (ctx) => ctx.previousOverall !== null && ctx.previousOverall < 40 && ctx.overall >= 80,
+  },
+  {
+    id: 'publikumsliebling',
+    icon: '🥇',
+    label: 'Publikumsliebling',
+    desc: 'In der Tages-Bestenliste unter den Top 3 gelandet',
+    check: () => false, // wird separat nach dem Einreichen ans Leaderboard geprüft, siehe checkLeaderboardTrophy()
   },
 ];
 
@@ -1099,8 +1434,54 @@ function achievementsByIds(ids){
   return ACHIEVEMENTS.filter(a => ids.includes(a.id));
 }
 
-function unlockedAchievements(s, overall, diff){
-  return ACHIEVEMENTS.filter(a => a.check(s, overall, diff));
+const PLAYED_DIFFS_KEY = 'reflexlab_played_diffs';
+function readPlayedDifficulties(){
+  try{
+    const data = JSON.parse(localStorage.getItem(PLAYED_DIFFS_KEY));
+    if(Array.isArray(data)) return data;
+  }catch(err){ /* fällt durch zum Standardwert */ }
+  return [];
+}
+function recordPlayedDifficulty(diff){
+  const played = readPlayedDifficulties();
+  if(!played.includes(diff)){
+    played.push(diff);
+    localStorage.setItem(PLAYED_DIFFS_KEY, JSON.stringify(played));
+  }
+  return played;
+}
+
+const LAST_OVERALL_KEY = 'reflexlab_last_overall';
+function getLastOverall(){
+  const v = localStorage.getItem(LAST_OVERALL_KEY);
+  return v === null ? null : Number(v);
+}
+function setLastOverall(overall){
+  localStorage.setItem(LAST_OVERALL_KEY, String(overall));
+}
+
+const TROPHIES_KEY = 'reflexlab_trophies';
+
+function readTrophies(){
+  try{
+    const data = JSON.parse(localStorage.getItem(TROPHIES_KEY));
+    if(data && typeof data === 'object') return data;
+  }catch(err){ /* fällt durch zum Standardwert */ }
+  return {};
+}
+
+function recordTrophies(unlockedIds){
+  const trophies = readTrophies();
+  let hasNew = false;
+  unlockedIds.forEach(id => {
+    if(!trophies[id]){ trophies[id] = todayISO(); hasNew = true; }
+  });
+  if(hasNew) localStorage.setItem(TROPHIES_KEY, JSON.stringify(trophies));
+  return trophies;
+}
+
+function unlockedAchievements(ctx){
+  return ACHIEVEMENTS.filter(a => a.check(ctx));
 }
 
 function renderResult(){
@@ -1112,9 +1493,22 @@ function renderResult(){
   const diag = diagnosisFor(overall);
   const diffLabel = DIFFICULTIES[difficulty].label;
   const streak = markPlayedToday();
+  const priorHistory = readHistory();
+  const priorBestOverall = Object.keys(priorHistory).length ? Math.max(...Object.values(priorHistory)) : null;
+  const isNewBest = priorBestOverall !== null && overall > priorBestOverall;
+  const rexState = isNewBest ? 'record' : (overall < 55 ? 'slow' : 'neutral');
   const history = recordHistory(overall);
   const recentDays = last7Days(history);
-  const achievements = unlockedAchievements(scores, overall, difficulty);
+  const previousOverall = getLastOverall();
+  setLastOverall(overall);
+  const playedDifficulties = recordPlayedDifficulty(difficulty);
+  const achievements = unlockedAchievements({
+    scores, overall, difficulty,
+    hour: new Date().getHours(),
+    streak, playedDifficulties, previousOverall,
+  });
+  const trophiesBefore = readTrophies();
+  recordTrophies(achievements.map(a => a.id));
 
   const achievementsLine = achievements.length
     ? `\n🏅 ${achievements.map(a => `${a.icon} ${a.label}`).join(', ')}`
@@ -1138,6 +1532,7 @@ Schlag das → `;
   });
 
   app.innerHTML = `
+    ${rexHTML(rexState)}
     <div class="receipt">
       <div class="receipt-sub">REFLEX LAB · LABORBERICHT · ${diffLabel}</div>
       <div class="receipt-title">${new Date().toLocaleDateString('de-DE')}</div>
@@ -1150,7 +1545,7 @@ Schlag das → `;
       <div class="receipt-row"><span>TIMING</span><span>${t.accuracy}%</span></div>
       <div class="receipt-row"><span>GEDÄCHTNIS</span><span>${m.correct}/${m.total}</span></div>
       <div class="receipt-row"><span>PRÄZISION</span><span>${p.score}%</span></div>
-      ${achievements.length ? `<hr><div class="achievements">${achievements.map(a => `<span class="achievement-badge" title="${a.desc}">${a.icon} ${a.label}</span>`).join('')}</div>` : ''}
+      ${achievements.length ? `<hr><div class="achievements">${achievements.map(a => `<span class="achievement-badge" title="${a.desc}">${a.icon} ${a.label}${!trophiesBefore[a.id] ? '<span class="new-tag">NEU</span>' : ''}</span>`).join('')}</div>` : ''}
       ${recentDays.length >= 2 ? `<hr><div class="sparkline-wrap"><div class="sparkline-label">VERLAUF · LETZTE 7 TAGE</div>${buildSparklineSvg(recentDays)}</div>` : ''}
       <hr>
       <div style="text-align:center; font-size:10px; color:var(--ink-soft);">ENDE DER PRÜFUNG</div>
@@ -1187,6 +1582,17 @@ Schlag das → `;
   }
   refreshLeaderboard();
 
+  async function checkLeaderboardTrophy(myOverall){
+    try{
+      const rows = await fetchLeaderboard(todayISO(), difficulty);
+      const thirdPlaceScore = rows.length >= 3 ? rows[2].overall : -1;
+      if(myOverall >= thirdPlaceScore && !readTrophies().publikumsliebling){
+        recordTrophies(['publikumsliebling']);
+        showToast('🥇 Neue Trophäe: Publikumsliebling!');
+      }
+    }catch(err){ /* Bestenliste nicht verfügbar — Trophäe einfach nicht prüfen */ }
+  }
+
   document.getElementById('submitScoreBtn').onclick = async ()=>{
     const btn = document.getElementById('submitScoreBtn');
     const input = document.getElementById('nicknameInput');
@@ -1209,6 +1615,7 @@ Schlag das → `;
       btn.textContent = '✓ Eingetragen';
       input.disabled = true;
       refreshLeaderboard();
+      checkLeaderboardTrophy(overall);
     }catch(err){
       btn.disabled = false;
       btn.textContent = 'Eintragen';
@@ -1222,7 +1629,7 @@ Schlag das → `;
     renderIntro();
   };
   document.getElementById('cardBtn').onclick = ()=>{
-    shareCard({ overall, diag, r, t, m, p, shareText: shareText + shareUrl, diffLabel, achievements, nickname: getNickname() });
+    shareCard({ overall, diag, r, t, m, p, shareText: shareText + shareUrl, diffLabel, achievements, nickname: getNickname(), rexState });
   };
   document.getElementById('linkBtn').onclick = async ()=>{
     const fullShareText = shareText + shareUrl;
@@ -1241,11 +1648,134 @@ Schlag das → `;
   };
 }
 
+/* ---------------- REX MASKOTTCHEN (Canvas) ---------------- */
+const REX_CANVAS_COLORS = {
+  ink: '#16221F',
+  inkSoft: '#4A5A55',
+  deviceEdge: '#0D1211',
+  signal: '#E2412C',
+  signalDim: '#F3C8C2',
+  yellow: '#F2B705',
+};
+
+function drawRexOnCanvas(ctx, centerX, topY, state){
+  const P = 9;
+  const x0 = centerX - (18 * P) / 2;
+  const y0 = topY;
+  const stateColor = state === 'record' ? REX_CANVAS_COLORS.yellow
+    : state === 'slow' ? REX_CANVAS_COLORS.inkSoft
+    : REX_CANVAS_COLORS.signal;
+
+  const rect = (gx, gy, gw, gh, color)=>{
+    ctx.fillStyle = color;
+    ctx.fillRect(x0 + gx * P, y0 + gy * P, gw * P, gh * P);
+  };
+
+  // floor shadow
+  ctx.fillStyle = 'rgba(22,34,31,0.12)';
+  ctx.beginPath();
+  ctx.ellipse(x0 + 9 * P, y0 + 19.5 * P, 5 * P, 1 * P, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // antenna (droops for "zu langsam")
+  ctx.save();
+  if(state === 'slow'){
+    ctx.translate(x0 + 9 * P, y0 + 4 * P);
+    ctx.rotate(50 * Math.PI / 180);
+    ctx.fillStyle = REX_CANVAS_COLORS.inkSoft;
+    ctx.fillRect(-0.5 * P, -3.5 * P, 1 * P, 3 * P);
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = stateColor;
+    ctx.fillRect(-1.5 * P, -4.5 * P, 3 * P, 2 * P);
+    ctx.globalAlpha = 1;
+  } else {
+    rect(8.5, 1, 1, 3, REX_CANVAS_COLORS.inkSoft);
+    ctx.shadowColor = stateColor;
+    ctx.shadowBlur = state === 'record' ? 18 : 10;
+    rect(7.5, 0, 3, 2, stateColor);
+    ctx.shadowBlur = 0;
+  }
+  ctx.restore();
+
+  // ears
+  rect(0, 7, 2, 6, REX_CANVAS_COLORS.ink);
+  rect(16, 7, 2, 6, REX_CANVAS_COLORS.ink);
+
+  // head
+  rect(2, 4, 14, 11, REX_CANVAS_COLORS.ink);
+  ctx.strokeStyle = REX_CANVAS_COLORS.deviceEdge;
+  ctx.lineWidth = P;
+  ctx.strokeRect(x0 + 2 * P, y0 + 4 * P, 14 * P, 11 * P);
+
+  // faceplate
+  rect(3, 6, 12, 8, REX_CANVAS_COLORS.deviceEdge);
+
+  // brow
+  const browY = state === 'record' ? 6.3 : state === 'slow' ? 8 : 6.7;
+  rect(4, browY, 4, 1, REX_CANVAS_COLORS.inkSoft);
+
+  // eye
+  ctx.shadowColor = stateColor;
+  ctx.shadowBlur = state === 'slow' ? 0 : 14;
+  ctx.globalAlpha = state === 'slow' ? 0.55 : 1;
+  if(state === 'record'){
+    rect(7, 7.3, 4, 4, stateColor);
+  } else if(state === 'slow'){
+    rect(7, 9, 4, 1, stateColor);
+  } else {
+    rect(7, 8, 4, 3, stateColor);
+  }
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur = 0;
+  if(state !== 'slow'){
+    rect(7, state === 'record' ? 7.3 : 8, 1, 1, REX_CANVAS_COLORS.signalDim);
+  }
+
+  // mouth
+  if(state === 'record'){
+    rect(9.5, 12, 4, 2, REX_CANVAS_COLORS.inkSoft);
+    rect(9.5, 12, 4, 1, REX_CANVAS_COLORS.deviceEdge);
+  } else if(state === 'slow'){
+    ctx.save();
+    ctx.translate(x0 + 11 * P, y0 + 13 * P);
+    ctx.rotate(8 * Math.PI / 180);
+    ctx.fillStyle = REX_CANVAS_COLORS.inkSoft;
+    ctx.fillRect(-1.5 * P, -0.5 * P, 3 * P, 1 * P);
+    ctx.restore();
+  } else {
+    rect(11, 13, 3, 1, REX_CANVAS_COLORS.inkSoft);
+  }
+
+  // bolt
+  rect(13, 6, 1, 1, REX_CANVAS_COLORS.inkSoft);
+
+  // neck
+  rect(7, 15, 4, 1, REX_CANVAS_COLORS.deviceEdge);
+
+  // feet
+  const footShift = state === 'slow' ? 1 : 0;
+  rect(2 + footShift, 16, 6, 4, REX_CANVAS_COLORS.ink);
+  rect(10 - footShift, 16, 6, 4, REX_CANVAS_COLORS.ink);
+
+  // sparks for "neuer rekord"
+  if(state === 'record'){
+    ctx.fillStyle = REX_CANVAS_COLORS.yellow;
+    ctx.shadowColor = REX_CANVAS_COLORS.yellow;
+    ctx.shadowBlur = 14;
+    [[1.5, 3], [16, 4], [17, 10]].forEach(([gx, gy])=>{
+      ctx.fillRect(x0 + gx * P, y0 + gy * P, P, P);
+    });
+    ctx.shadowBlur = 0;
+  }
+}
+
 /* ---------------- SHARE CARD (Canvas) ---------------- */
 function buildCardCanvas(data){
-  const { overall, diag, r, t, m, p, diffLabel, achievements = [], nickname = '' } = data;
+  const { overall, diag, r, t, m, p, diffLabel, achievements = [], nickname = '', rexState = 'neutral' } = data;
   const W = 640;
-  const H = 900 + (achievements.length ? 110 : 0);
+  const REX_TOP = 210;
+  const cardH = 900 + (achievements.length ? 110 : 0);
+  const H = REX_TOP + cardH;
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -1253,6 +1783,11 @@ function buildCardCanvas(data){
   // paper background
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, H);
+
+  drawRexOnCanvas(ctx, W / 2, 20, rexState);
+
+  ctx.save();
+  ctx.translate(0, REX_TOP);
 
   // subtle top strip
   ctx.fillStyle = '#EDF1EC';
@@ -1327,22 +1862,23 @@ function buildCardCanvas(data){
 
   ctx.fillStyle = '#16221F';
   ctx.font = '700 16px Inter, sans-serif';
-  ctx.fillText('Schlag das Ergebnis 👉', centerX, H - 60);
+  ctx.fillText('Schlag das Ergebnis 👉', centerX, cardH - 60);
 
   // torn edge effect at bottom
   ctx.fillStyle = '#EDF1EC';
   const teeth = 20;
   const toothWidth = W / teeth;
   ctx.beginPath();
-  ctx.moveTo(0, H);
+  ctx.moveTo(0, cardH);
   for(let i = 0; i <= teeth; i++){
     const x = i * toothWidth;
-    ctx.lineTo(x, H - (i % 2 === 0 ? 14 : 0));
+    ctx.lineTo(x, cardH - (i % 2 === 0 ? 14 : 0));
   }
-  ctx.lineTo(W, H);
+  ctx.lineTo(W, cardH);
   ctx.closePath();
   ctx.fill();
 
+  ctx.restore();
   return canvas;
 }
 
