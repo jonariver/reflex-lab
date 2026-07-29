@@ -697,7 +697,7 @@ function renderIntro(){
     const c = incomingChallenge;
     const challengeDiff = DIFFICULTIES[c.diff] ? c.diff : 'normal';
     app.innerHTML = `
-      <div class="eyebrow">Tages-Challenge · ${c.date || todayLabel}</div>
+      <div class="eyebrow">${getNickname() ? `Willkommen zurück, ${escapeHtml(getNickname())} · ` : 'Tages-Challenge · '}${c.date || todayLabel}</div>
       <h1 class="display" style="font-size:24px;">HERAUSGEFORDERT</h1>
       <p class="sub">Jemand hat heute auf <strong>${DIFFICULTIES[challengeDiff].label}</strong> <strong>${c.overall}/100</strong> erreicht — Diagnose: „${c.diag}“. Schaffst du mehr?</p>
       ${peekStreak() > 0 ? `<div class="streak-badge">🔥 ${peekStreak()} ${peekStreak() === 1 ? 'Tag' : 'Tage'} in Folge</div>` : ''}
@@ -717,7 +717,7 @@ function renderIntro(){
   }
 
   app.innerHTML = `
-    <div class="eyebrow">Tages-Challenge · ${todayLabel}</div>
+    <div class="eyebrow">${getNickname() ? `Willkommen zurück, ${escapeHtml(getNickname())} · ` : 'Tages-Challenge · '}${todayLabel}</div>
     <h1 class="display">REFLEX LAB</h1>
     <p class="sub">Wir testen Reaktion, Timing, Gedächtnis und Präzision. Heute haben alle die gleiche Challenge — am Ende bekommst du deinen Laborbericht.</p>
     ${peekStreak() > 0 ? `<div class="streak-badge">🔥 ${peekStreak()} ${peekStreak() === 1 ? 'Tag' : 'Tage'} in Folge</div>` : ''}
