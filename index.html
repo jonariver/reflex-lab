@@ -1222,7 +1222,7 @@ Schlag das → `;
     renderIntro();
   };
   document.getElementById('cardBtn').onclick = ()=>{
-    shareCard({ overall, diag, r, t, m, p, shareText: shareText + shareUrl, diffLabel, achievements });
+    shareCard({ overall, diag, r, t, m, p, shareText: shareText + shareUrl, diffLabel, achievements, nickname: getNickname() });
   };
   document.getElementById('linkBtn').onclick = async ()=>{
     const fullShareText = shareText + shareUrl;
@@ -1243,7 +1243,7 @@ Schlag das → `;
 
 /* ---------------- SHARE CARD (Canvas) ---------------- */
 function buildCardCanvas(data){
-  const { overall, diag, r, t, m, p, diffLabel, achievements = [] } = data;
+  const { overall, diag, r, t, m, p, diffLabel, achievements = [], nickname = '' } = data;
   const W = 640;
   const H = 900 + (achievements.length ? 110 : 0);
   const canvas = document.createElement('canvas');
@@ -1265,9 +1265,18 @@ function buildCardCanvas(data){
   ctx.font = '700 15px "Space Mono", monospace';
   ctx.fillText(`REFLEX LAB · TAGES-CHALLENGE · ${diffLabel}`, centerX, 40);
 
-  ctx.fillStyle = '#16221F';
-  ctx.font = '700 17px "Space Mono", monospace';
-  ctx.fillText(new Date().toLocaleDateString('de-DE'), centerX, 105);
+  if(nickname){
+    ctx.fillStyle = '#4A5A55';
+    ctx.font = '700 13px "Space Mono", monospace';
+    ctx.fillText(nickname.toUpperCase(), centerX, 88);
+    ctx.fillStyle = '#16221F';
+    ctx.font = '700 15px "Space Mono", monospace';
+    ctx.fillText(new Date().toLocaleDateString('de-DE'), centerX, 112);
+  } else {
+    ctx.fillStyle = '#16221F';
+    ctx.font = '700 17px "Space Mono", monospace';
+    ctx.fillText(new Date().toLocaleDateString('de-DE'), centerX, 105);
+  }
 
   dashedLine(ctx, 40, 130, W - 40, 130);
 
