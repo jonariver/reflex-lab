@@ -14,6 +14,72 @@
 <meta name="apple-mobile-web-app-title" content="Reflex Lab">
 <link rel="stylesheet" href="styles.css">
 <style>
+  /* ---------- Leaderboard ---------- */
+  .leaderboard-card{
+    width: 100%;
+    max-width: 260px;
+    background: #fff;
+    color: var(--ink);
+    padding: 18px 18px 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-top: 14px;
+    text-align: left;
+  }
+  .leaderboard-title{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .leaderboard-list{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .leaderboard-row{
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+  }
+  .leaderboard-row span:first-child{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+  }
+  .leaderboard-empty{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .leaderboard-form{
+    display: flex;
+    gap: 6px;
+    border-top: 1px dashed #c9c9c9;
+    padding-top: 12px;
+  }
+  .nickname-input{
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 8px 10px;
+    border: 1px solid var(--paper-dim);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .leaderboard-form button{
+    padding: 8px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
   /* ---------- Sparkline ---------- */
   .sparkline-wrap{
     margin-top: 12px;
@@ -494,6 +560,62 @@ function buildSparklineSvg(days){
     <polyline points="${points}" fill="none" stroke="#3F6D66" stroke-width="2" />
     ${dots}
   </svg>`;
+}
+
+/* ---------------- LEADERBOARD ---------------- */
+const SUPABASE_URL = 'https://djuifrrzclywuweofyrv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_i7k7KvvOFmJlcokjALq73g_vZyS4whr';
+const NICKNAME_KEY = 'reflexlab_nickname';
+
+function getNickname(){ return localStorage.getItem(NICKNAME_KEY) || ''; }
+function setNickname(name){ localStorage.setItem(NICKNAME_KEY, name); }
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+async function fetchLeaderboard(date, diff){
+  const params = new URLSearchParams({
+    play_date: `eq.${date}`,
+    difficulty: `eq.${diff}`,
+    select: 'nickname,overall',
+    order: 'overall.desc,created_at.asc',
+    limit: '10',
+  });
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leaderboard_entries?${params}`, {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+  });
+  if(!res.ok) throw new Error('leaderboard fetch failed');
+  return res.json();
+}
+
+async function submitScore(entry){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leaderboard_entries`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(entry),
+  });
+  if(!res.ok) throw new Error('leaderboard submit failed');
+}
+
+function renderLeaderboardRows(rows){
+  if(!rows.length) return '<div class="leaderboard-empty">Noch keine Einträge heute — sei die/der Erste!</div>';
+  return rows.map((row, i) => `
+    <div class="leaderboard-row">
+      <span>${i + 1}. ${row.nickname ? escapeHtml(row.nickname) : 'Anonym'}</span>
+      <span>${row.overall}</span>
+    </div>
+  `).join('');
 }
 
 /* ---------------- SHARE LINK ---------------- */
@@ -997,10 +1119,11 @@ function renderResult(){
   const achievementsLine = achievements.length
     ? `\n🏅 ${achievements.map(a => `${a.icon} ${a.label}`).join(', ')}`
     : '';
+  const nicknameLine = getNickname() ? `Spieler: ${getNickname()}\n` : '';
 
   const shareText =
 `🧪 REFLEX LAB — TAGES-CHALLENGE ${todayLabel}
-Schwierigkeit: ${diffLabel}
+${nicknameLine}Schwierigkeit: ${diffLabel}
 Gesamt: ${overall}/100 — ${diag.title}
 ⚡ Reaktion: ${r.ms}ms
 🎯 Timing: ${t.accuracy}%
@@ -1033,6 +1156,14 @@ Schlag das → `;
       <div style="text-align:center; font-size:10px; color:var(--ink-soft);">ENDE DER PRÜFUNG</div>
     </div>
     ${streak > 1 ? `<div class="streak-badge" style="margin: 18px auto 0; display:flex;">🔥 ${streak} Tage in Folge</div>` : ''}
+    <div class="leaderboard-card">
+      <div class="leaderboard-title">BESTENLISTE · ${diffLabel} · HEUTE</div>
+      <div class="leaderboard-list" id="leaderboardList">Lädt…</div>
+      <div class="leaderboard-form">
+        <input type="text" id="nicknameInput" class="nickname-input" placeholder="Spitzname (optional)" maxlength="24">
+        <button class="ghost" id="submitScoreBtn">Eintragen</button>
+      </div>
+    </div>
     <div class="result-actions">
       <button class="ghost" id="againBtn">Nochmal</button>
       <button class="signal" id="linkBtn">Link teilen</button>
@@ -1041,6 +1172,49 @@ Schlag das → `;
       <button class="ghost" id="cardBtn" style="width:100%;">Karte als Bild teilen</button>
     </div>
   `;
+
+  document.getElementById('nicknameInput').value = getNickname();
+
+  async function refreshLeaderboard(){
+    const listEl = document.getElementById('leaderboardList');
+    if(!listEl) return;
+    try{
+      const rows = await fetchLeaderboard(todayISO(), difficulty);
+      listEl.innerHTML = renderLeaderboardRows(rows);
+    }catch(err){
+      listEl.innerHTML = '<div class="leaderboard-empty">Bestenliste momentan nicht verfügbar.</div>';
+    }
+  }
+  refreshLeaderboard();
+
+  document.getElementById('submitScoreBtn').onclick = async ()=>{
+    const btn = document.getElementById('submitScoreBtn');
+    const input = document.getElementById('nicknameInput');
+    const nickname = input.value.trim().slice(0, 24);
+    setNickname(nickname);
+    btn.disabled = true;
+    btn.textContent = 'Sende…';
+    try{
+      await submitScore({
+        play_date: todayISO(),
+        difficulty,
+        nickname: nickname || null,
+        overall,
+        reaction_ms: r.ms,
+        timing_accuracy: t.accuracy,
+        memory_correct: m.correct,
+        memory_total: m.total,
+        precision_score: p.score,
+      });
+      btn.textContent = '✓ Eingetragen';
+      input.disabled = true;
+      refreshLeaderboard();
+    }catch(err){
+      btn.disabled = false;
+      btn.textContent = 'Eintragen';
+      showToast('Eintragen fehlgeschlagen');
+    }
+  };
 
   document.getElementById('againBtn').onclick = ()=>{
     scores = {};
