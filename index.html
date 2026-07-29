@@ -865,14 +865,18 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
-async function fetchLeaderboard(date, diff){
+async function fetchLeaderboard(diff, period = 'today'){
   const params = new URLSearchParams({
-    play_date: `eq.${date}`,
     difficulty: `eq.${diff}`,
-    select: 'nickname,overall',
+    select: 'nickname,overall,play_date',
     order: 'overall.desc,created_at.asc',
     limit: '10',
   });
+  if(period === 'week'){
+    params.set('play_date', `gte.${isoDaysAgo(6)}`);
+  } else {
+    params.set('play_date', `eq.${todayISO()}`);
+  }
   const res = await fetch(`${SUPABASE_URL}/rest/v1/leaderboard_entries?${params}`, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
@@ -897,14 +901,64 @@ async function submitScore(entry){
   if(!res.ok) throw new Error('leaderboard submit failed');
 }
 
-function renderLeaderboardRows(rows){
-  if(!rows.length) return '<div class="leaderboard-empty">Noch keine Einträge heute — sei die/der Erste!</div>';
+function formatShortDate(iso){
+  const [, m, d] = iso.split('-');
+  return `${d}.${m}.`;
+}
+
+function renderLeaderboardRows(rows, opts = {}){
+  if(!rows.length) return `<div class="leaderboard-empty">${opts.emptyText || 'Noch keine Einträge — sei die/der Erste!'}</div>`;
   return rows.map((row, i) => `
     <div class="leaderboard-row">
-      <span>${i + 1}. ${row.nickname ? escapeHtml(row.nickname) : 'Anonym'}</span>
+      <span>${i + 1}. ${row.nickname ? escapeHtml(row.nickname) : 'Anonym'}${opts.showDate ? ` <span style="opacity:.55;">· ${formatShortDate(row.play_date)}</span>` : ''}</span>
       <span>${row.overall}</span>
     </div>
   `).join('');
+}
+
+function renderLeaderboardView(){
+  progressEl.innerHTML = '';
+  let lbDiff = difficulty;
+  let lbPeriod = 'today';
+
+  const draw = () => {
+    const diffLabel = DIFFICULTIES[lbDiff].label;
+    app.innerHTML = `
+      <div class="eyebrow">Bestenliste</div>
+      <h1 class="display" style="font-size:24px;">RANGLISTE</h1>
+      <div class="diff-picker">
+        ${Object.keys(DIFFICULTIES).map(key => `<button class="diff-chip${key === lbDiff ? ' active' : ''}" data-diff="${key}">${DIFFICULTIES[key].label}</button>`).join('')}
+      </div>
+      <div class="diff-picker" style="margin-top:-14px;">
+        <button class="diff-chip${lbPeriod === 'today' ? ' active' : ''}" data-period="today">Heute</button>
+        <button class="diff-chip${lbPeriod === 'week' ? ' active' : ''}" data-period="week">Diese Woche</button>
+      </div>
+      <div class="leaderboard-card">
+        <div class="leaderboard-title">BESTENLISTE · ${diffLabel} · ${lbPeriod === 'today' ? 'HEUTE' : 'DIESE WOCHE'}</div>
+        <div class="leaderboard-list" id="leaderboardList">Lädt…</div>
+      </div>
+      <button class="ghost" id="lbBackBtn" style="margin-top:18px;">← Zurück</button>
+    `;
+    document.querySelectorAll('.diff-chip[data-diff]').forEach(chip=>{
+      chip.onclick = ()=>{ lbDiff = chip.dataset.diff; draw(); };
+    });
+    document.querySelectorAll('.diff-chip[data-period]').forEach(chip=>{
+      chip.onclick = ()=>{ lbPeriod = chip.dataset.period; draw(); };
+    });
+    document.getElementById('lbBackBtn').onclick = renderIntro;
+
+    const listEl = document.getElementById('leaderboardList');
+    fetchLeaderboard(lbDiff, lbPeriod).then(rows=>{
+      listEl.innerHTML = renderLeaderboardRows(rows, {
+        showDate: lbPeriod === 'week',
+        emptyText: lbPeriod === 'week' ? 'Diese Woche noch keine Einträge — sei die/der Erste!' : 'Noch keine Einträge heute — sei die/der Erste!',
+      });
+    }).catch(()=>{
+      listEl.innerHTML = '<div class="leaderboard-empty">Bestenliste momentan nicht verfügbar.</div>';
+    });
+  };
+
+  draw();
 }
 
 /* ---------------- SHARE LINK ---------------- */
@@ -1020,6 +1074,8 @@ function renderIntro(){
       <span class="text-link" style="text-decoration:none;"> · </span>
       <a class="text-link" href="trophaeen.html">Trophäen</a>
       <span class="text-link" style="text-decoration:none;"> · </span>
+      <span class="text-link" id="leaderboardLink" style="cursor:pointer;">Bestenliste</span>
+      <span class="text-link" style="text-decoration:none;"> · </span>
       <a class="text-link" href="impressum.html">Impressum</a>
       <span class="text-link" style="text-decoration:none;"> · </span>
       <a class="text-link" href="datenschutz.html">Datenschutz</a>
@@ -1029,6 +1085,7 @@ function renderIntro(){
     chip.onclick = ()=>{ setDifficulty(chip.dataset.diff); renderIntro(); };
   });
   document.getElementById('startBtn').onclick = ()=>{ resetDailyRng(); nextTest(); };
+  document.getElementById('leaderboardLink').onclick = renderLeaderboardView;
 }
 
 function nextTest(){
@@ -1574,7 +1631,7 @@ Schlag das → `;
     const listEl = document.getElementById('leaderboardList');
     if(!listEl) return;
     try{
-      const rows = await fetchLeaderboard(todayISO(), difficulty);
+      const rows = await fetchLeaderboard(difficulty, 'today');
       listEl.innerHTML = renderLeaderboardRows(rows);
     }catch(err){
       listEl.innerHTML = '<div class="leaderboard-empty">Bestenliste momentan nicht verfügbar.</div>';
@@ -1584,7 +1641,7 @@ Schlag das → `;
 
   async function checkLeaderboardTrophy(myOverall){
     try{
-      const rows = await fetchLeaderboard(todayISO(), difficulty);
+      const rows = await fetchLeaderboard(difficulty, 'today');
       const thirdPlaceScore = rows.length >= 3 ? rows[2].overall : -1;
       if(myOverall >= thirdPlaceScore && !readTrophies().publikumsliebling){
         recordTrophies(['publikumsliebling']);
