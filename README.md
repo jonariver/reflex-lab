@@ -2,7 +2,7 @@
 
 **Reflex Lab** ist eine kleine Progressive Web App (PWA), die deine Reaktionsfähigkeit, dein Timing-Gefühl, dein Kurzzeitgedächtnis und deine motorische Präzision testet. Jeden Tag bekommen alle Spieler:innen dieselbe Challenge — am Ende gibt es einen "Laborbericht" mit Diagnose zum Teilen.
 
-🔗 Live: [reflex-lab](https://github.com/jonariver/reflex-lab)
+🔗 Live: [reflex-lab](https://reflex-lab-beta.vercel.app/)
 
 ## Features
 
