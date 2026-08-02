@@ -853,6 +853,14 @@ function mapRange(v, inMin, inMax, outMin, outMax){
   const t = clamp((v - inMin) / (inMax - inMin), 0, 1);
   return outMin + t * (outMax - outMin);
 }
+// #device wird auf Desktop per CSS `zoom` vergrößert. getBoundingClientRect()/offsetWidth
+// liefern dort bereits gerenderte (gezoomte) Pixel — ein daraus berechneter Wert, der per
+// style.left/top/width auf ein Element *innerhalb* des gezoomten Bereichs zurückgeschrieben
+// wird, würde sonst ein zweites Mal gezoomt und landet dadurch am falschen Ort.
+function deviceZoom(){
+  const z = parseFloat(getComputedStyle(document.getElementById('device')).zoom);
+  return z > 0 ? z : 1;
+}
 
 /* ---------------- DAILY SEED ---------------- */
 function mulberry32(seed){
@@ -1561,6 +1569,7 @@ function renderTimingClassic(){
   targetEl.style.width = zonePct + '%';
   targetEl.style.left = ((100 - zonePct) / 2) + '%';
   const trackWidth = track.offsetWidth;
+  const zoom = deviceZoom();
   let pos = 0;
   let dir = 1;
   const speed = diffCfg().timingSpeed;
@@ -1571,7 +1580,7 @@ function renderTimingClassic(){
     pos += dir * speed;
     if(pos >= trackWidth - 4){ pos = trackWidth - 4; dir = -1; }
     if(pos <= 0){ pos = 0; dir = 1; }
-    needle.style.left = pos + 'px';
+    needle.style.left = (pos / zoom) + 'px';
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
@@ -1675,11 +1684,12 @@ function renderTimingApproach(){
   let velocity = 0;
   let tapped = false;
   let running = false;
+  const zoom = deviceZoom();
 
   function startRound(){
     trackWidth = track.offsetWidth;
     lineX = trackWidth * LINE_PCT;
-    stopline.style.left = lineX + 'px';
+    stopline.style.left = (lineX / zoom) + 'px';
     accelPx = trackWidth * mapRange(diffCfg().timingSpeed, 3.0, 6.0, 0.00045, 0.0011);
     pos = 0;
     velocity = trackWidth * 0.012;
@@ -1694,7 +1704,7 @@ function renderTimingApproach(){
     if(!running) return;
     velocity += accelPx;
     pos += velocity;
-    needle.style.left = Math.min(pos, trackWidth - 4) + 'px';
+    needle.style.left = (Math.min(pos, trackWidth - 4) / zoom) + 'px';
     if(pos >= trackWidth - 4){
       finishRound(false);
       return;
@@ -1983,6 +1993,7 @@ function renderPrecisionClassic(){
   `;
   const field = document.getElementById('field');
   const fieldRect = () => ({ width: field.offsetWidth, height: field.offsetHeight });
+  const zoom = deviceZoom();
   let round = 0;
   const results = [];
   const isMobilePrecision = window.matchMedia('(max-width: 480px)').matches;
@@ -2001,8 +2012,8 @@ function renderPrecisionClassic(){
     target.className = 'precision-target';
     target.style.width = size + 'px';
     target.style.height = size + 'px';
-    target.style.left = x + 'px';
-    target.style.top = y + 'px';
+    target.style.left = (x / zoom) + 'px';
+    target.style.top = (y / zoom) + 'px';
     target.style.transition = 'width 1.1s linear, height 1.1s linear, left 1.1s linear, top 1.1s linear';
     field.appendChild(target);
 
@@ -2010,8 +2021,8 @@ function renderPrecisionClassic(){
       const shrink = size * 0.35;
       target.style.width = shrink + 'px';
       target.style.height = shrink + 'px';
-      target.style.left = (x + (size-shrink)/2) + 'px';
-      target.style.top = (y + (size-shrink)/2) + 'px';
+      target.style.left = (x / zoom + (size-shrink)/2) + 'px';
+      target.style.top = (y / zoom + (size-shrink)/2) + 'px';
     });
 
     let clicked = false;
@@ -2076,6 +2087,7 @@ function renderPrecisionTracking(){
 
   const ROUND_MS = 5000;
   const speed = mapRange(diffCfg().precisionTimeoutMs, 800, 1500, 3.4, 1.6);
+  const zoom = deviceZoom();
   const fieldRect = () => field.getBoundingClientRect();
   const rect0 = fieldRect();
   let x = rng() * Math.max(rect0.width - size, 10);
@@ -2109,11 +2121,11 @@ function renderPrecisionTracking(){
     if(x >= maxX){ x = maxX; dx *= -1; }
     if(y <= 0){ y = 0; dy *= -1; }
     if(y >= maxY){ y = maxY; dy *= -1; }
-    target.style.left = x + 'px';
-    target.style.top = y + 'px';
+    target.style.left = (x / zoom) + 'px';
+    target.style.top = (y / zoom) + 'px';
     if(pointerX !== null){
-      cursor.style.left = (pointerX - cursorSize / 2) + 'px';
-      cursor.style.top = (pointerY - cursorSize / 2) + 'px';
+      cursor.style.left = (pointerX / zoom - cursorSize / 2) + 'px';
+      cursor.style.top = (pointerY / zoom - cursorSize / 2) + 'px';
       cursor.style.opacity = '1';
       const dist = Math.hypot(pointerX - (x + size / 2), pointerY - (y + size / 2));
       distances.push(dist);
@@ -2148,6 +2160,7 @@ function renderPrecisionSteady(){
   const startSize = isMobilePrecision ? diffCfg().precisionSize.mobile * 0.9 : diffCfg().precisionSize.desktop * 1.3;
   const minSize = startSize * 0.35;
   const ROUND_MS = 4500;
+  const zoom = deviceZoom();
 
   const fieldRect = () => field.getBoundingClientRect();
   const rect0 = fieldRect();
@@ -2188,10 +2201,10 @@ function renderPrecisionSteady(){
     const size = startSize + (minSize - startSize) * progress;
     ring.style.width = size + 'px';
     ring.style.height = size + 'px';
-    ring.style.left = (cx - size / 2) + 'px';
-    ring.style.top = (cy - size / 2) + 'px';
+    ring.style.left = (cx / zoom - size / 2) + 'px';
+    ring.style.top = (cy / zoom - size / 2) + 'px';
 
-    const inside = pointerX !== null && Math.hypot(pointerX - cx, pointerY - cy) <= size / 2;
+    const inside = pointerX !== null && Math.hypot(pointerX - cx, pointerY - cy) <= (size * zoom) / 2;
     ring.classList.toggle('inside', inside);
     if(inside) insideMs += dt;
 
@@ -2931,6 +2944,35 @@ async function shareCard(data){
     showToast('Karte heruntergeladen ✓');
   }, 'image/png');
 }
+
+/* ---------------- RESPONSIVE SCREEN-HÖHE (DESKTOP) ---------------- */
+// `zoom` auf #device ignoriert Änderungen an min-height zuverlässig (Browser-Eigenheit) —
+// deshalb hier stattdessen eine explizite height messen und setzen, damit das Gerät auf
+// typischen Desktop-Fensterhöhen nicht über den sichtbaren Viewport hinausragt
+// (sonst sind z.B. Verfolgung/Ruhige Hand unten abgeschnitten und nicht bedienbar).
+function fitDesktopScreen(){
+  const screenEl = document.getElementById('screen');
+  const deviceEl = document.getElementById('device');
+  if(!window.matchMedia('(min-width: 700px)').matches){
+    screenEl.style.height = '';
+    screenEl.style.minHeight = '';
+    return;
+  }
+  screenEl.style.height = '';
+  screenEl.style.minHeight = '';
+  const naturalScreenH = screenEl.getBoundingClientRect().height;
+  const naturalDeviceH = deviceEl.getBoundingClientRect().height;
+  const chrome = naturalDeviceH - naturalScreenH;
+  const zoom = parseFloat(getComputedStyle(deviceEl).zoom) || 1.5;
+  const stagePadding = 48;
+  const margin = 16;
+  const availableForScreen = window.innerHeight - stagePadding - margin - chrome;
+  const targetLocal = Math.min(650, Math.max(availableForScreen / zoom, 320));
+  screenEl.style.height = targetLocal + 'px';
+  screenEl.style.minHeight = targetLocal + 'px';
+}
+window.addEventListener('resize', fitDesktopScreen);
+fitDesktopScreen();
 
 renderIntro();
 
