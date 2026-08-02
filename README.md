@@ -11,8 +11,9 @@
   - **Timing** — eine bewegte Nadel im richtigen Moment in der Zielzone stoppen
   - **Memory** — sich ein Muster auf einem Grid merken und wiederholen
   - **Precision** — ein Ziel möglichst genau treffen
-- **Tägliche Challenge** — für alle Spieler:innen an einem Tag identisch (deterministischer Seed), inklusive drei Schwierigkeitsstufen
-- **Globales Tages-Leaderboard** — Highscores werden über Supabase gespeichert und angezeigt
+- **Tägliche Challenge** — für alle Spieler:innen an einem Tag identisch (deterministischer Seed), inklusive drei Schwierigkeitsstufen und drei rotierenden Spielarten ("Set A"/"Set B"/"Set C" — Set B und C ersetzen alle vier Testmechaniken durch Varianten: Fehlalarm/Zielwahl, Rhythmus/Anflug, Abweichung/Pärchen, Verfolgung/Ruhige Hand)
+- **Trainingsmodus** — jeder Test lässt sich einzeln und in jeder der drei Varianten üben, ohne Tageswertung und ohne Bestenliste
+- **Globales Tages-Leaderboard** — Highscores werden über Supabase gespeichert und angezeigt, getrennt nach Schwierigkeit und Set
 - **Challenge-Links** — eigene Ergebnisse lassen sich als Link teilen, damit Freunde dieselbe Challenge nachspielen können
 - **Trophäenschrank** (`trophaeen.html`) — Bestenliste und gesammelte Erfolge
 - **Persönlicher Spitzname** — Begrüßung und Share-Card personalisieren sich anhand eines gespeicherten Nicknames
@@ -38,7 +39,7 @@ reflex-lab/
 ## Tech-Stack
 
 - Reines HTML, CSS und Vanilla JavaScript — keine Build-Tools oder Frameworks
-- [Supabase](https://supabase.com/) als Backend für das globale Tages-Leaderboard
+- [Supabase](https://supabase.com/) als Backend für das globale Tages-Leaderboard — Tabelle `leaderboard_entries` braucht eine `ruleset text`-Spalte (Werte `'A'`/`'B'`/`'C'`, Default `'A'`) für die Set-Rotation
 - PWA-Grundlagen (Manifest + Service Worker) für Installierbarkeit auf dem Homescreen
 
 ## Lokal ausführen
