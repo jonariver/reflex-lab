@@ -1190,8 +1190,10 @@ function renderIntro(){
     <div class="diff-picker">
       ${Object.keys(DIFFICULTIES).map(key => `<button class="diff-chip${key === difficulty ? ' active' : ''}" data-diff="${key}">${DIFFICULTIES[key].label}</button>`).join('')}
     </div>
-    <button class="signal" id="startBtn">Test starten</button>
-    <button class="ghost" id="practiceBtn" style="margin-top:10px;">Üben</button>
+    <div style="display:inline-flex; flex-direction:column; align-items:stretch;">
+      <button class="signal" id="startBtn">Test starten</button>
+      <button class="ghost" id="practiceBtn" style="margin-top:10px;">Üben</button>
+    </div>
     <div style="margin-top:16px;">
       <a class="text-link" href="changelog.html">Was gibt's Neues?</a>
       <span class="text-link" style="text-decoration:none;"> · </span>
