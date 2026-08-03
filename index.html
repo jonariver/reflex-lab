@@ -2475,7 +2475,7 @@ function renderResult(){
 
   const shareText =
 `🧪 REFLEX LAB — TAGES-CHALLENGE ${todayLabel}
-${nicknameLine}Schwierigkeit: ${diffLabel}
+${nicknameLine}Schwierigkeit: ${diffLabel} · Set: ${rulesetCfg().label}
 Gesamt: ${overall}/100 — ${diag.title}
 ⚡ Reaktion: ${r.ms}ms
 🎯 Timing: ${t.accuracy}%
@@ -2492,7 +2492,7 @@ Schlag das → `;
   app.innerHTML = `
     ${rexHTML(rexState)}
     <div class="receipt">
-      <div class="receipt-sub">REFLEX LAB · LABORBERICHT · ${diffLabel}</div>
+      <div class="receipt-sub">REFLEX LAB · LABORBERICHT · ${diffLabel} · ${rulesetCfg().label}</div>
       <div class="receipt-title">${new Date().toLocaleDateString('de-DE')}</div>
       <hr>
       <div class="receipt-diagnosis">${diag.title}</div>
@@ -2757,7 +2757,7 @@ function buildCardCanvas(data){
 
   ctx.fillStyle = '#4A5A55';
   ctx.font = '700 15px "Space Mono", monospace';
-  ctx.fillText(`REFLEX LAB · TAGES-CHALLENGE · ${diffLabel}`, centerX, 40);
+  ctx.fillText(`REFLEX LAB · TAGES-CHALLENGE · ${diffLabel} · ${rulesetCfg().label}`, centerX, 40);
 
   if(nickname){
     ctx.fillStyle = '#4A5A55';
