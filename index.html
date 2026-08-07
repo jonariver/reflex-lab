@@ -135,6 +135,21 @@
     margin-bottom: 18px;
   }
 
+  /* ---------- Sound toggle ---------- */
+  .sound-toggle{
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    background: var(--paper-dim);
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
   /* ---------- Text link ---------- */
   .text-link{
     font-family: var(--font-mono);
@@ -790,6 +805,98 @@ function rexHTML(state){
   `;
 }
 
+/* ---------------- SIGNAL LOOP (Intro-Jingle) ----------------
+   Eigene, an "Popcorn" erinnernde 8-Bit-Melodie (keine Kopie der
+   geschützten Originalmelodie) — startet auf dem ersten Tap auf dem
+   Startbildschirm, da Browser Autoplay mit Ton ohne Nutzergeste blocken. */
+const SOUND_KEY = 'reflexlab_sound_enabled';
+function isSoundEnabled(){ return localStorage.getItem(SOUND_KEY) !== '0'; }
+function setSoundEnabled(v){ localStorage.setItem(SOUND_KEY, v ? '1' : '0'); }
+
+const JINGLE_BPM = 132;
+const JINGLE_STEPS = ['F#5','A5','F#5','E5','A5','F#5','D5','F#5','B4','D5','B4','A4','D5','B4','F#4','A4'];
+const JINGLE_FREQS = { 'F#4': 369.99, 'A4': 440.00, 'B4': 493.88, 'D5': 587.33, 'E5': 659.25, 'F#5': 739.99, 'A5': 880.00 };
+const JINGLE_MAX_LOOPS = 2;
+
+let jingleCtx = null, jingleFilter = null, jingleMaster = null;
+let jinglePlaying = false, jingleTimer = null, introJingleHandler = null;
+
+function ensureJingleAudio(){
+  if(jingleCtx) return;
+  jingleCtx = new (window.AudioContext || window.webkitAudioContext)();
+  jingleMaster = jingleCtx.createGain();
+  jingleMaster.gain.value = 0.8;
+  jingleFilter = jingleCtx.createBiquadFilter();
+  jingleFilter.type = 'lowpass';
+  jingleFilter.frequency.value = 5200;
+  const delay = jingleCtx.createDelay();
+  delay.delayTime.value = (60 / JINGLE_BPM / 2) * 2;
+  const feedback = jingleCtx.createGain();
+  feedback.gain.value = 0.16;
+  const delayWet = jingleCtx.createGain();
+  delayWet.gain.value = 0.2;
+  jingleFilter.connect(jingleMaster);
+  jingleFilter.connect(delay);
+  delay.connect(feedback);
+  feedback.connect(delay);
+  delay.connect(delayWet);
+  delayWet.connect(jingleMaster);
+  jingleMaster.connect(jingleCtx.destination);
+}
+
+function playJingleNote(freq, t, dur, peak){
+  const osc = jingleCtx.createOscillator();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(freq, t);
+  const sub = jingleCtx.createOscillator();
+  sub.type = 'triangle';
+  sub.frequency.setValueAtTime(freq / 2, t);
+  const subGain = jingleCtx.createGain();
+  subGain.gain.value = 0.32;
+  const g = jingleCtx.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(peak, t + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.connect(g);
+  sub.connect(subGain);
+  subGain.connect(g);
+  g.connect(jingleFilter);
+  osc.start(t); osc.stop(t + dur + 0.03);
+  sub.start(t); sub.stop(t + dur + 0.03);
+}
+
+function scheduleJingleLoop(startAt, loopsLeft){
+  const base = 60 / JINGLE_BPM / 2;
+  let t = startAt;
+  JINGLE_STEPS.forEach((note, i) => {
+    const swing = (i % 2 === 1) ? base * 0.16 : 0;
+    playJingleNote(JINGLE_FREQS[note], t + swing, base * 0.7, 0.16);
+    t += base;
+  });
+  const totalDur = t - startAt;
+  jingleTimer = setTimeout(() => {
+    if(jinglePlaying && loopsLeft > 1) scheduleJingleLoop(jingleCtx.currentTime + 0.03, loopsLeft - 1);
+    else stopIntroJingle();
+  }, totalDur * 1000);
+}
+
+function playIntroJingle(){
+  if(jinglePlaying || !isSoundEnabled()) return;
+  ensureJingleAudio();
+  if(jingleCtx.state === 'suspended') jingleCtx.resume();
+  jinglePlaying = true;
+  scheduleJingleLoop(jingleCtx.currentTime + 0.05, JINGLE_MAX_LOOPS);
+  const rex = document.querySelector('.rex-mascot');
+  if(rex) rex.classList.add('rex-mascot--record');
+}
+
+function stopIntroJingle(){
+  jinglePlaying = false;
+  clearTimeout(jingleTimer);
+  const rex = document.querySelector('.rex-mascot');
+  if(rex) rex.classList.remove('rex-mascot--record');
+}
+
 function showToast(msg){
   toastEl.textContent = msg;
   toastEl.classList.add('show');
@@ -1019,6 +1126,7 @@ function renderLeaderboardRows(rows, opts = {}){
 }
 
 function renderLeaderboardView(){
+  stopIntroJingle();
   progressEl.innerHTML = '';
   let lbDiff = difficulty;
   let lbRuleset = dailyRulesetKey();
@@ -1194,6 +1302,7 @@ function renderIntro(){
     <h1 class="display">REFLEX LAB</h1>
     <p class="sub">Wir testen Reaktion, Timing, Gedächtnis und Präzision. Heute haben alle die gleiche Challenge im <strong>${rulesetCfg().label}</strong> — am Ende bekommst du deinen Laborbericht.</p>
     ${peekStreak() > 0 ? `<div class="streak-badge">🔥 ${peekStreak()} ${peekStreak() === 1 ? 'Tag' : 'Tage'} in Folge</div>` : ''}
+    <button type="button" class="sound-toggle" id="soundToggle" aria-pressed="${isSoundEnabled()}">${isSoundEnabled() ? '🔊 Ton an' : '🔇 Ton aus'}</button>
     ${rexHTML('neutral')}
     <div class="diff-picker">
       ${Object.keys(DIFFICULTIES).map(key => `<button class="diff-chip${key === difficulty ? ' active' : ''}" data-diff="${key}">${DIFFICULTIES[key].label}</button>`).join('')}
@@ -1220,9 +1329,28 @@ function renderIntro(){
   document.getElementById('startBtn').onclick = ()=>{ resetDailyRng(); nextTest(); };
   document.getElementById('leaderboardLink').onclick = renderLeaderboardView;
   document.getElementById('practiceBtn').onclick = renderPracticeMenu;
+
+  const soundToggleBtn = document.getElementById('soundToggle');
+  soundToggleBtn.addEventListener('pointerdown', e => e.stopPropagation());
+  soundToggleBtn.onclick = ()=>{
+    const next = !isSoundEnabled();
+    setSoundEnabled(next);
+    soundToggleBtn.textContent = next ? '🔊 Ton an' : '🔇 Ton aus';
+    soundToggleBtn.setAttribute('aria-pressed', String(next));
+    if(next) playIntroJingle(); else stopIntroJingle();
+  };
+
+  if(jinglePlaying){
+    const rex = document.querySelector('.rex-mascot');
+    if(rex) rex.classList.add('rex-mascot--record');
+  }
+  if(introJingleHandler) app.removeEventListener('pointerdown', introJingleHandler);
+  introJingleHandler = () => playIntroJingle();
+  app.addEventListener('pointerdown', introJingleHandler, { once: true });
 }
 
 function nextTest(){
+  stopIntroJingle();
   if(practiceMode){ renderPracticeResult(); return; }
   currentTestIndex++;
   if(currentTestIndex >= TESTS.length){
@@ -1262,6 +1390,7 @@ function mechanicsForTest(test){
 }
 
 function renderPracticeMenu(){
+  stopIntroJingle();
   practiceMode = null;
   currentTestIndex = -1;
   progressEl.innerHTML = '';
