@@ -3095,18 +3095,20 @@ async function shareCard(data){
 
 /* ---------------- RESPONSIVE SCREEN-HÖHE (DESKTOP) ---------------- */
 // `zoom` auf #device ignoriert Änderungen an min-height zuverlässig (Browser-Eigenheit) —
-// deshalb hier stattdessen eine explizite height messen und setzen, damit das Gerät auf
+// deshalb hier stattdessen eine explizite min-height messen und setzen, damit das Gerät auf
 // typischen Desktop-Fensterhöhen nicht über den sichtbaren Viewport hinausragt
 // (sonst sind z.B. Verfolgung/Ruhige Hand unten abgeschnitten und nicht bedienbar).
+// Bewusst nur min-height (keine feste height): kurze Screens (Spiele, Start) füllen genau
+// die verfügbare Viewport-Höhe wie zuvor, aber Screens mit mehr Inhalt als der Viewport
+// (z. B. der Ergebnis-Screen mit Bestenliste) dürfen darüber hinauswachsen und die Seite
+// scrollt normal, statt dass der Inhalt abgeschnitten wird.
 function fitDesktopScreen(){
   const screenEl = document.getElementById('screen');
   const deviceEl = document.getElementById('device');
   if(!window.matchMedia('(min-width: 700px)').matches){
-    screenEl.style.height = '';
     screenEl.style.minHeight = '';
     return;
   }
-  screenEl.style.height = '';
   screenEl.style.minHeight = '';
   const naturalScreenH = screenEl.getBoundingClientRect().height;
   const naturalDeviceH = deviceEl.getBoundingClientRect().height;
@@ -3116,7 +3118,6 @@ function fitDesktopScreen(){
   const margin = 16;
   const availableForScreen = window.innerHeight - stagePadding - margin - chrome;
   const targetLocal = Math.min(650, Math.max(availableForScreen / zoom, 320));
-  screenEl.style.height = targetLocal + 'px';
   screenEl.style.minHeight = targetLocal + 'px';
 }
 window.addEventListener('resize', fitDesktopScreen);
