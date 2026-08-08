@@ -808,7 +808,8 @@ function rexHTML(state){
 /* ---------------- SIGNAL LOOP (Intro-Jingle) ----------------
    Eigene, an "Popcorn" erinnernde 8-Bit-Melodie (keine Kopie der
    geschützten Originalmelodie) — startet auf dem ersten Tap auf dem
-   Startbildschirm, da Browser Autoplay mit Ton ohne Nutzergeste blocken. */
+   Startbildschirm, da Browser Autoplay mit Ton ohne Nutzergeste blocken.
+   Wird auch auf dem Ergebnis-Screen abgespielt (dort ohne REX-Tanz). */
 const SOUND_KEY = 'reflexlab_sound_enabled';
 function isSoundEnabled(){ return localStorage.getItem(SOUND_KEY) !== '0'; }
 function setSoundEnabled(v){ localStorage.setItem(SOUND_KEY, v ? '1' : '0'); }
@@ -820,6 +821,7 @@ const JINGLE_MAX_LOOPS = 2;
 
 let jingleCtx = null, jingleFilter = null, jingleMaster = null;
 let jinglePlaying = false, jingleTimer = null, introJingleHandler = null;
+let jingleDanceRex = true;
 
 function ensureJingleAudio(){
   if(jingleCtx) return;
@@ -880,21 +882,26 @@ function scheduleJingleLoop(startAt, loopsLeft){
   }, totalDur * 1000);
 }
 
-function playIntroJingle(){
+function playIntroJingle(danceRex = true){
   if(jinglePlaying || !isSoundEnabled()) return;
   ensureJingleAudio();
   if(jingleCtx.state === 'suspended') jingleCtx.resume();
   jinglePlaying = true;
+  jingleDanceRex = danceRex;
   scheduleJingleLoop(jingleCtx.currentTime + 0.05, JINGLE_MAX_LOOPS);
-  const rex = document.querySelector('.rex-mascot');
-  if(rex) rex.classList.add('rex-mascot--record');
+  if(jingleDanceRex){
+    const rex = document.querySelector('.rex-mascot');
+    if(rex) rex.classList.add('rex-mascot--record');
+  }
 }
 
 function stopIntroJingle(){
   jinglePlaying = false;
   clearTimeout(jingleTimer);
-  const rex = document.querySelector('.rex-mascot');
-  if(rex) rex.classList.remove('rex-mascot--record');
+  if(jingleDanceRex){
+    const rex = document.querySelector('.rex-mascot');
+    if(rex) rex.classList.remove('rex-mascot--record');
+  }
 }
 
 function showToast(msg){
@@ -2619,6 +2626,7 @@ Schlag das → `;
   });
 
   app.innerHTML = `
+    <button type="button" class="sound-toggle" id="resultSoundToggle" aria-pressed="${isSoundEnabled()}">${isSoundEnabled() ? '🔊 Ton an' : '🔇 Ton aus'}</button>
     ${rexHTML(rexState)}
     <div class="receipt">
       <div class="receipt-sub">REFLEX LAB · LABORBERICHT · ${diffLabel} · ${rulesetCfg().label}</div>
@@ -2656,6 +2664,16 @@ Schlag das → `;
   `;
 
   document.getElementById('nicknameInput').value = getNickname();
+
+  const resultSoundToggleBtn = document.getElementById('resultSoundToggle');
+  resultSoundToggleBtn.onclick = ()=>{
+    const next = !isSoundEnabled();
+    setSoundEnabled(next);
+    resultSoundToggleBtn.textContent = next ? '🔊 Ton an' : '🔇 Ton aus';
+    resultSoundToggleBtn.setAttribute('aria-pressed', String(next));
+    if(next) playIntroJingle(false); else stopIntroJingle();
+  };
+  playIntroJingle(false);
 
   async function refreshLeaderboard(){
     const listEl = document.getElementById('leaderboardList');
@@ -2712,6 +2730,7 @@ Schlag das → `;
   };
 
   document.getElementById('againBtn').onclick = ()=>{
+    stopIntroJingle();
     scores = {};
     resetDailyRng();
     renderIntro();
