@@ -885,13 +885,25 @@ function scheduleJingleLoop(startAt, loopsLeft){
 function playIntroJingle(danceRex = true){
   if(jinglePlaying || !isSoundEnabled()) return;
   ensureJingleAudio();
-  if(jingleCtx.state === 'suspended') jingleCtx.resume();
   jinglePlaying = true;
   jingleDanceRex = danceRex;
-  scheduleJingleLoop(jingleCtx.currentTime + 0.05, JINGLE_MAX_LOOPS);
-  if(jingleDanceRex){
-    const rex = document.querySelector('.rex-mascot');
-    if(rex) rex.classList.add('rex-mascot--record');
+  const startNow = () => {
+    // Kann inzwischen (z.B. schnelle Navigation) wieder gestoppt worden sein.
+    if(!jinglePlaying) return;
+    scheduleJingleLoop(jingleCtx.currentTime + 0.05, JINGLE_MAX_LOOPS);
+    if(jingleDanceRex){
+      const rex = document.querySelector('.rex-mascot');
+      if(rex) rex.classList.add('rex-mascot--record');
+    }
+  };
+  // Auf manchen Mobilgeräten (v.a. Android Chrome) bleibt der AudioContext auch nach dem
+  // resume()-Aufruf noch kurz "suspended" — currentTime steht dabei still, wodurch sofort
+  // eingeplante Noten ins Leere laufen können. Deshalb erst nach abgeschlossenem resume()
+  // Noten einplanen, statt die Promise nur "fire and forget" anzustoßen.
+  if(jingleCtx.state === 'suspended'){
+    jingleCtx.resume().then(startNow);
+  } else {
+    startNow();
   }
 }
 
